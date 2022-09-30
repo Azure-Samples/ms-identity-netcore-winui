@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "active-directory-dotnet-native-win-ui (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "active-directory-dotnet-native-win-ui (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
