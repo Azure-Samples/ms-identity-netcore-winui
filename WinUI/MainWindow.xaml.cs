@@ -61,7 +61,7 @@ namespace winui
             PublicClientApp = PublicClientApplicationBuilder.Create(ClientId)
                 .WithAuthority(Authority)
                 .WithBroker(true)
-            //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
+                //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
                 .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
                 .Build();
 
@@ -117,10 +117,10 @@ namespace winui
         private async Task<string> SignInUserAndGetTokenUsingMSAL(string[] scopes)
         {
             // returns smth like S-1-15-2-2601115387-131721061-1180486061-1362788748-631273777-3164314714-2766189824
-            string sid = Windows.Security.Authentication.Web.WebAuthenticationBroker.GetCurrentApplicationCallbackUri().Host.ToUpper();
+            //string sid = Windows.Security.Authentication.Web.WebAuthenticationBroker.GetCurrentApplicationCallbackUri().Host.ToUpper();
 
             // This is redirect uri you need to register in the app registration portal. The app config does not need it.
-            string redirectUri = $"ms-appx-web://microsoft.aad.brokerplugin/{sid}";
+            string redirectUri = $"ms-appx-web://microsoft.aad.brokerplugin/{ClientId}";
 
             // Initialize the MSAL library by building a public client application
             PublicClientApp = PublicClientApplicationBuilder.Create(ClientId)
@@ -150,8 +150,7 @@ namespace winui
 
                 // Must be called from UI thread
                 authResult = await PublicClientApp.AcquireTokenInteractive(scopes)
-                                                  .ExecuteAsync()
-                                                  .ConfigureAwait(false);
+                                                  .ExecuteAsync();
 
             }
 

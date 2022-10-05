@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0-windows10.0.22621.0</TargetFramework>
+		<TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<RootNamespace>active_directory_dotnet_native_win_ui</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
@@ -50,6 +50,6 @@
 
 	<PropertyGroup>
 		<WindowsPackageType>None</WindowsPackageType>
-		<SupportedOSPlatformVersion>10.0.22621.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
 </Project>
