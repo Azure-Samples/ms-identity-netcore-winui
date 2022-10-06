@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "winui", "WinUI\winui.csproj", "{CA29E881-06F3-4B2D-B1D9-01FAA791278A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinUIMSALApp", "WinUIMSALApp\WinUIMSALApp.csproj", "{81022BE8-CFED-49BB-B4A0-997EB957BFED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|arm64 = Debug|arm64
@@ -32,12 +34,27 @@ Global
 		{CA29E881-06F3-4B2D-B1D9-01FAA791278A}.Release|x64.Build.0 = Release|x64
 		{CA29E881-06F3-4B2D-B1D9-01FAA791278A}.Release|x86.ActiveCfg = Release|x86
 		{CA29E881-06F3-4B2D-B1D9-01FAA791278A}.Release|x86.Build.0 = Release|x86
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Debug|arm64.ActiveCfg = Debug|arm64
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Debug|arm64.Build.0 = Debug|arm64
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Debug|arm64.Deploy.0 = Debug|arm64
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Debug|x64.ActiveCfg = Debug|x64
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Debug|x64.Build.0 = Debug|x64
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Debug|x64.Deploy.0 = Debug|x64
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Debug|x86.ActiveCfg = Debug|x86
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Debug|x86.Build.0 = Debug|x86
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Debug|x86.Deploy.0 = Debug|x86
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Release|arm64.ActiveCfg = Release|arm64
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Release|arm64.Build.0 = Release|arm64
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Release|arm64.Deploy.0 = Release|arm64
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Release|x64.ActiveCfg = Release|x64
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Release|x64.Build.0 = Release|x64
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Release|x64.Deploy.0 = Release|x64
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Release|x86.ActiveCfg = Release|x86
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Release|x86.Build.0 = Release|x86
+		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{CA29E881-06F3-4B2D-B1D9-01FAA791278A} = {FD188AB9-151F-4546-AD39-B6F0EC6559DA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D7FD0C76-F5AD-4791-A179-B4168FF18689}

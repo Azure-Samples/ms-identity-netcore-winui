@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
+		<TargetFramework>net6.0-windows10.0.22621.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<RootNamespace>active_directory_dotnet_native_win_ui</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
@@ -23,8 +23,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Graph" Version="4.42.0" />
-		<PackageReference Include="Microsoft.Identity.Client" Version="4.47.1" />
+		<PackageReference Include="Microsoft.Graph" Version="4.43.0" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.47.2" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.5" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.1" />
 		<Manifest Include="$(ApplicationManifest)" />
