@@ -40,9 +40,9 @@ namespace WinUIMSALApp
         //   - for any Work or School accounts, use organizations
         //   - for any Work or School accounts, or Microsoft personal account, use common
         //   - for Microsoft Personal account, use consumers
-        private const string ClientId = "4a1aa1d5-c567-49d0-ad0b-cd957a47f842";
+        private const string ClientId = "0c9e0ae7-d93a-4294-bd79-d70d40486600"; //"4a1aa1d5-c567-49d0-ad0b-cd957a47f842";
 
-        private const string Tenant = "common"; // Alternatively "[Enter your tenant, as obtained from the azure portal, e.g. kko365.onmicrosoft.com]"
+        private const string Tenant = "979f4440-75dc-4664-b2e1-2cafa0ac67d1"; // Alternatively "[Enter your tenant, as obtained from the azure portal, e.g. kko365.onmicrosoft.com]"
         private const string Authority = "https://login.microsoftonline.com/" + Tenant;
 
         // The MSAL Public client app
@@ -59,8 +59,9 @@ namespace WinUIMSALApp
             // Initialize the MSAL library by building a public client application
             _PublicClientApp = PublicClientApplicationBuilder.Create(ClientId)
                 .WithAuthority(Authority)
-                //.WithBroker(true)
-            //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
+                //if not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
+                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{ClientId}")
+                //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
                 .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
                 .Build();
 
@@ -116,20 +117,6 @@ namespace WinUIMSALApp
         /// <returns> Access Token</returns>
         private async Task<string> SignInUserAndGetTokenUsingMSAL(string[] scopes)
         {
-            // returns smth like S-1-15-2-2601115387-131721061-1180486061-1362788748-631273777-3164314714-2766189824
-            //string sid = Windows.Security.Authentication.Web.WebAuthenticationBroker.GetCurrentApplicationCallbackUri().Host.ToUpper();
-
-            // This is redirect uri you need to register in the app registration portal. The app config does not need it.
-            string redirectUri = $"ms-appx-web://microsoft.aad.brokerplugin/{ClientId}";
-
-            //// Initialize the MSAL library by building a public client application
-            //_PublicClientApp = PublicClientApplicationBuilder.Create(ClientId)
-            //    .WithAuthority(Authority)
-            //    .WithBroker(true)
-            //    //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
-            //    .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
-            //    .Build();
-
             _currentUserAccount = _currentUserAccount ?? (await _PublicClientApp.GetAccountsAsync()).FirstOrDefault();
 
             try
@@ -151,7 +138,6 @@ namespace WinUIMSALApp
                 // Must be called from UI thread
                 authResult = await _PublicClientApp.AcquireTokenInteractive(scopes)
                                                   .ExecuteAsync();
-
             }
 
             return authResult.AccessToken;
@@ -183,7 +169,7 @@ namespace WinUIMSALApp
             try
             {
                 await _PublicClientApp.RemoveAsync(firstAccount).ConfigureAwait(false);
-                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                DispatcherQueue.TryEnqueue(() =>
                 {
                     ResultText.Text = "User has signed-out";
                     TokenInfoText.Text = string.Empty;
@@ -216,16 +202,7 @@ namespace WinUIMSALApp
         /// </summary>
         private async Task DisplayMessageAsync(string message)
         {
-            //await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
-            //       () =>
-            //       {
-            ResultText.Text = message;
-            //       });
-        }
-
-        private void myButton_Click(object sender, RoutedEventArgs e)
-        {
-            //myButton.Content = "Clicked";
+            await Task.Run(() => DispatcherQueue.TryEnqueue(() => { ResultText.Text = message; }));
         }
     }
 }
