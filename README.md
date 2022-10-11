@@ -7,3 +7,4 @@
 # How the code was created
 [New WAM implementation](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam)
 The current sample is based on [UWP sample](https://github.com/Azure-Samples/active-directory-dotnet-native-uwp-v2)
+[Token cache](https://learn.microsoft.com/azure/active-directory/develop/msal-net-token-cache-serialization?tabs=desktop)
