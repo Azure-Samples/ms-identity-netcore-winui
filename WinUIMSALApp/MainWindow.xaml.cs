@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Configuration;
+using Microsoft.Identity.Client.Extensions.Msal;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -20,6 +21,9 @@ namespace WinUIMSALApp
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        //Constant resources
+        private static readonly string _buttonTextAuthorized = "Call Microsoft Graph API";
+
         //Set the scope for API call to user.read
         private static readonly string[] scopes = ConfigurationManager.AppSettings["Scopes"].Split(' ');
 
@@ -32,11 +36,13 @@ namespace WinUIMSALApp
         //   - for any Work or School accounts, or Microsoft personal account, use common
         //   - for Microsoft Personal account, use consumers
         private static readonly string ClientId = ConfigurationManager.AppSettings["ClientId"];
+        private static readonly string TenantId = ConfigurationManager.AppSettings["TenantId"];
 
         // As for the Tenant, you can use a name as obtained from the azure portal, e.g. kko365.onmicrosoft.com"
-        private static readonly string Authority = string.Format(ConfigurationManager.AppSettings["Authority"], ConfigurationManager.AppSettings["TenantId"]);
+        private static readonly string Authority = string.Format(ConfigurationManager.AppSettings["Authority"], TenantId);
         private static readonly string MSGraphURL = ConfigurationManager.AppSettings["MSGraphURL"];
-        private static readonly string RedirectUri = string.Format(ConfigurationManager.AppSettings["RedirectUri"], ConfigurationManager.AppSettings["TenantId"]);
+        private static readonly string RedirectURL = string.Format(ConfigurationManager.AppSettings["RedirectURL"], ClientId);
+
         private static AuthenticationResult authResult;
         private static IAccount _currentUserAccount;
         // The MSAL Public client app
@@ -50,16 +56,20 @@ namespace WinUIMSALApp
             _PublicClientApp = PublicClientApplicationBuilder.Create(ClientId)
                 .WithAuthority(Authority)
                 //if not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
-                .WithRedirectUri(RedirectUri)
+                .WithRedirectUri(RedirectURL)
                 //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
                 .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
                 .Build();
+
+            //Cache configuration and hook-up to public application
+            var storageProperties = new StorageCreationPropertiesBuilder(ConfigurationManager.AppSettings["CacheFileName"], ConfigurationManager.AppSettings["CacheDir"]).Build();
+            Task.Run(async () => await MsalCacheHelper.CreateAsync(storageProperties)).Result.RegisterCache(_PublicClientApp.UserTokenCache);
 
             _currentUserAccount = Task.Run(async () => await _PublicClientApp.GetAccountsAsync()).Result.FirstOrDefault();
 
             if (_currentUserAccount != null)
             {
-                this.CallGraphButton.Content = "Call Microsoft Graph API";
+                this.CallGraphButton.Content = _buttonTextAuthorized;
                 this.SignOutButton.Visibility = Visibility.Visible;
             }
         }
@@ -85,7 +95,7 @@ namespace WinUIMSALApp
                                       + "\nUser Principal Name: " + graphUser.UserPrincipalName;
                     DisplayBasicTokenInfo(authResult);
                     this.SignOutButton.Visibility = Visibility.Visible;
-                    this.CallGraphButton.Content = "Call Microsoft Graph API";
+                    this.CallGraphButton.Content = _buttonTextAuthorized;
                 });
             }
             catch (MsalException msalEx)
@@ -116,7 +126,7 @@ namespace WinUIMSALApp
 
                 await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
-                    this.CallGraphButton.Content = "Call Microsoft Graph API";
+                    this.CallGraphButton.Content = _buttonTextAuthorized;
                 });
 
             }
@@ -165,7 +175,7 @@ namespace WinUIMSALApp
                     TokenInfoText.Text = string.Empty;
                     this.CallGraphButton.Visibility = Visibility.Visible;
                     this.SignOutButton.Visibility = Visibility.Collapsed;
-                    this.CallGraphButton.Content = "Sign-In and Call Microsoft Graph API";
+                    this.CallGraphButton.Content = $"Sign-In and {_buttonTextAuthorized}";
                 });
             }
             catch (MsalException ex)
