@@ -2,22 +2,13 @@
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using System.Configuration;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -30,7 +21,7 @@ namespace WinUIMSALApp
     public sealed partial class MainWindow : Window
     {
         //Set the scope for API call to user.read
-        private string[] scopes = new string[] { "user.read" };
+        private static readonly string[] scopes = ConfigurationManager.AppSettings["Scopes"].Split(' ');
 
         // Below are the clientId (Application Id) of your app registration and the tenant information. 
         // You have to replace:
@@ -40,17 +31,16 @@ namespace WinUIMSALApp
         //   - for any Work or School accounts, use organizations
         //   - for any Work or School accounts, or Microsoft personal account, use common
         //   - for Microsoft Personal account, use consumers
-        private const string ClientId = "0c9e0ae7-d93a-4294-bd79-d70d40486600"; //"4a1aa1d5-c567-49d0-ad0b-cd957a47f842";
+        private static readonly string ClientId = ConfigurationManager.AppSettings["ClientId"];
 
-        private const string Tenant = "979f4440-75dc-4664-b2e1-2cafa0ac67d1"; // Alternatively "[Enter your tenant, as obtained from the azure portal, e.g. kko365.onmicrosoft.com]"
-        private const string Authority = "https://login.microsoftonline.com/" + Tenant;
-
-        // The MSAL Public client app
-        private static IPublicClientApplication _PublicClientApp;
-
-        private static string MSGraphURL = "https://graph.microsoft.com/v1.0/";
+        // As for the Tenant, you can use a name as obtained from the azure portal, e.g. kko365.onmicrosoft.com"
+        private static readonly string Authority = string.Format(ConfigurationManager.AppSettings["Authority"], ConfigurationManager.AppSettings["TenantId"]);
+        private static readonly string MSGraphURL = ConfigurationManager.AppSettings["MSGraphURL"];
+        private static readonly string RedirectUri = string.Format(ConfigurationManager.AppSettings["RedirectUri"], ConfigurationManager.AppSettings["TenantId"]);
         private static AuthenticationResult authResult;
         private static IAccount _currentUserAccount;
+        // The MSAL Public client app
+        private static IPublicClientApplication _PublicClientApp;
 
         public MainWindow()
         {
@@ -60,7 +50,7 @@ namespace WinUIMSALApp
             _PublicClientApp = PublicClientApplicationBuilder.Create(ClientId)
                 .WithAuthority(Authority)
                 //if not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
-                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{ClientId}")
+                .WithRedirectUri(RedirectUri)
                 //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
                 .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
                 .Build();
