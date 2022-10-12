@@ -10,3 +10,6 @@ The current sample is based on [UWP sample](https://github.com/Azure-Samples/act
 [Token cache](https://learn.microsoft.com/azure/active-directory/develop/msal-net-token-cache-serialization?tabs=desktop)
 
 [IOptions Pattern](https://learn.microsoft.com/dotnet/core/extensions/options)
+
+# Scenario
+![topology](./ReadmeFiles/topology.png)
