@@ -71,25 +71,8 @@
       "Id": "client",
       "Name": "WinUI-App-Calling-MsGraph",
       "Kind": "WinUI",
-      //"HomePage": "https://localhost:44321/",
-      //"ReplyUrls": "https://localhost:44321/signin-oidc",
-      //"LogoutUrl": "https://localhost:44321/signout-oidc",
       "Audience": "AzureADMyOrg",
-      "PasswordCredentials": "Auto",
-      //"RequiredResourcesAccess": [
-      //  {
-      //    "Resource": "service",
-      //    "DelegatedPermissions": [ "ToDoList.Read", "ToDoList.ReadWrite" ]
-      //  }
-      //],
-      //"OptionalClaims": {
-      //  "IdTokenClaims": [ "acct" ]
-      //},
-      //"ManualSteps": [],
-      //"Sample": {
-      //  "SampleSubPath": "4-WebApp-Your-API\\4-1-MyOrg",
-      //  "ProjectDirectory": "\\Client"
-      //}
+      "PasswordCredentials": "Auto"
     }
   ],
 
@@ -100,35 +83,11 @@
     with respect to the root of the sample, and the mapping (which string in the config file is mapped to which value
   */
   "CodeConfiguration": [
-    //{
-    //  "App": "service",
-    //  "SettingKind": "Text",
-    //  "SettingFile": "\\..\\TodoListService\\appsettings.json",
-    //  "Mappings": [
-    //    {
-    //      "key": "Domain",
-    //      "value": "$tenantName"
-    //    },
-    //    {
-    //      "key": "TenantId",
-    //      "value": "$tenantId"
-    //    },
-    //    {
-    //      "key": "ClientId",
-    //      "value": "service.AppId"
-    //    }
-    //  ]
-    //},
-
     {
       "App": "client",
       "SettingKind": "Text",
       "SettingFile": "\\..\\WinUIMSALApp\\appsettings.json",
       "Mappings": [
-        //{
-        //  "key": "Domain",
-        //  "value": "$tenantName"
-        //},
         {
           "key": "TenantId",
           "value": "$tenantId"
@@ -137,18 +96,6 @@
           "key": "ClientId",
           "value": ".AppId"
         }
-        //{
-        //  "key": "ClientSecret",
-        //  "value": "$pwdCredential.SecretText"
-        //},
-        //{
-        //  "key": "TodoListScopes",
-        //  "value": "service.RequiredScopes"
-        //},
-        //{
-        //  "key": "TodoListBaseAddress",
-        //  "value": "service.HomePage"
-        //}
       ]
     }
   ]

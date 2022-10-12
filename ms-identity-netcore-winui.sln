@@ -6,6 +6,11 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FD188AB9-151F-4546-AD39-B6F0EC6559DA}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
+		ReadmeFiles\ReadmeAboutTheCode.md = ReadmeFiles\ReadmeAboutTheCode.md
+		ReadmeFiles\ReadmeExploreTheSample.md = ReadmeFiles\ReadmeExploreTheSample.md
+		ReadmeFiles\ReadmeHowTheCodeWasCreated.md = ReadmeFiles\ReadmeHowTheCodeWasCreated.md
+		ReadmeFiles\ReadmeLearnMore.md = ReadmeFiles\ReadmeLearnMore.md
+		ReadmeFiles\ReadmeTroubleshooting.md = ReadmeFiles\ReadmeTroubleshooting.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinUIMSALApp", "WinUIMSALApp\WinUIMSALApp.csproj", "{81022BE8-CFED-49BB-B4A0-997EB957BFED}"
