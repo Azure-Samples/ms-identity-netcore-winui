@@ -1,7 +1,7 @@
 ﻿using Microsoft.IdentityModel.Abstractions;
 using System.Diagnostics;
 
-namespace WinUIMSALApp
+namespace WinUIMSALApp.Logging
 {
     public class IdentityLogger : IIdentityLogger
     {

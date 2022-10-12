@@ -8,8 +8,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Configuration;
 using Microsoft.Identity.Client.Extensions.Msal;
+using Microsoft.Extensions.Configuration;
+using WinUIMSALApp.Configuration;
+using WinUIMSALApp.Logging;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -24,45 +26,43 @@ namespace WinUIMSALApp
         //Constant resources
         private static readonly string _buttonTextAuthorized = "Call Microsoft Graph API";
 
-        //Set the scope for API call to user.read
-        private static readonly string[] scopes = ConfigurationManager.AppSettings["Scopes"].Split(' ');
-
-        // Below are the clientId (Application Id) of your app registration and the tenant information. 
+        // Inside WinUISettings object are the ClientId (Application Id) of your app registration and the tenant information. 
         // You have to replace:
         // - the content of ClientID with the Application Id for your app registration
         // - The content of Tenant by the information about the accounts allowed to sign-in in your application:
         //   - For Work or School account in your org, use your tenant ID, or domain
         //   - for any Work or School accounts, use organizations
         //   - for any Work or School accounts, or Microsoft personal account, use common
-        //   - for Microsoft Personal account, use consumers
-        private static readonly string ClientId = ConfigurationManager.AppSettings["ClientId"];
-        private static readonly string TenantId = ConfigurationManager.AppSettings["TenantId"];
+        //   - for Microsoft Personal account, use consumers  
 
         // As for the Tenant, you can use a name as obtained from the azure portal, e.g. kko365.onmicrosoft.com"
-        private static readonly string Authority = string.Format(ConfigurationManager.AppSettings["Authority"], TenantId);
-        private static readonly string MSGraphURL = ConfigurationManager.AppSettings["MSGraphURL"];
-        private static readonly string RedirectURL = string.Format(ConfigurationManager.AppSettings["RedirectURL"], ClientId);
+        private readonly WinUISettings _winUiSettings;
 
-        private static AuthenticationResult authResult;
-        private static IAccount _currentUserAccount;
+        private AuthenticationResult _authResult;
+        private IAccount _currentUserAccount;
+
         // The MSAL Public client app
         private static IPublicClientApplication _PublicClientApp;
 
         public MainWindow()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+
+            // Using appsettings.json as our configuration settings and utilizing IOptions pattern - https://learn.microsoft.com/dotnet/core/extensions/options
+            var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            _winUiSettings = configuration.GetSection("AzureAAD").Get<WinUISettings>();
 
             // Initialize the MSAL library by building a public client application
-            _PublicClientApp = PublicClientApplicationBuilder.Create(ClientId)
-                .WithAuthority(Authority)
+            _PublicClientApp = PublicClientApplicationBuilder.Create(_winUiSettings.ClientId)
+                .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
                 //if not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
-                .WithRedirectUri(RedirectURL)
+                .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId))
                 //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
                 .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
                 .Build();
 
-            //Cache configuration and hook-up to public application
-            var storageProperties = new StorageCreationPropertiesBuilder(ConfigurationManager.AppSettings["CacheFileName"], ConfigurationManager.AppSettings["CacheDir"]).Build();
+            //Cache configuration and hook-up to public application. Refer to https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/wiki/Cross-platform-Token-Cache#configuring-the-token-cache
+            var storageProperties = new StorageCreationPropertiesBuilder(_winUiSettings.CacheFileName, _winUiSettings.CacheDir).Build();
             Task.Run(async () => await MsalCacheHelper.CreateAsync(storageProperties)).Result.RegisterCache(_PublicClientApp.UserTokenCache);
 
             _currentUserAccount = Task.Run(async () => await _PublicClientApp.GetAccountsAsync()).Result.FirstOrDefault();
@@ -82,7 +82,7 @@ namespace WinUIMSALApp
             try
             {
                 // Sign-in user using MSAL and obtain an access token for MS Graph
-                GraphServiceClient graphClient = await SignInAndInitializeGraphServiceClient(scopes);
+                GraphServiceClient graphClient = await SignInAndInitializeGraphServiceClient(_winUiSettings.Scopes.Split(' '));
 
                 // Call the /me endpoint of Graph
                 User graphUser = await graphClient.Me.Request().GetAsync();
@@ -93,7 +93,7 @@ namespace WinUIMSALApp
                     ResultText.Text = "Display Name: " + graphUser.DisplayName + "\nBusiness Phone: " + graphUser.BusinessPhones.FirstOrDefault()
                                       + "\nGiven Name: " + graphUser.GivenName + "\nid: " + graphUser.Id
                                       + "\nUser Principal Name: " + graphUser.UserPrincipalName;
-                    DisplayBasicTokenInfo(authResult);
+                    DisplayBasicTokenInfo(_authResult);
                     this.SignOutButton.Visibility = Visibility.Visible;
                     this.CallGraphButton.Content = _buttonTextAuthorized;
                 });
@@ -121,10 +121,10 @@ namespace WinUIMSALApp
 
             try
             {
-                authResult = await _PublicClientApp.AcquireTokenSilent(scopes, _currentUserAccount)
+                _authResult = await _PublicClientApp.AcquireTokenSilent(scopes, _currentUserAccount)
                                                   .ExecuteAsync();
 
-                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                DispatcherQueue.TryEnqueue(() =>
                 {
                     this.CallGraphButton.Content = _buttonTextAuthorized;
                 });
@@ -136,11 +136,11 @@ namespace WinUIMSALApp
                 Debug.WriteLine($"MsalUiRequiredException: {ex.Message}");
 
                 // Must be called from UI thread
-                authResult = await _PublicClientApp.AcquireTokenInteractive(scopes)
+                _authResult = await _PublicClientApp.AcquireTokenInteractive(scopes)
                                                   .ExecuteAsync();
             }
 
-            return authResult.AccessToken;
+            return _authResult.AccessToken;
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace WinUIMSALApp
         /// <returns>GraphServiceClient</returns>
         private async Task<GraphServiceClient> SignInAndInitializeGraphServiceClient(string[] scopes)
         {
-            GraphServiceClient graphClient = new GraphServiceClient(MSGraphURL,
+            GraphServiceClient graphClient = new GraphServiceClient(_winUiSettings.MsGraphURL,
                 new DelegateAuthenticationProvider(async (requestMessage) =>
                 {
                     requestMessage.Headers.Authorization = new AuthenticationHeaderValue("bearer", await SignInUserAndGetTokenUsingMSAL(scopes));
