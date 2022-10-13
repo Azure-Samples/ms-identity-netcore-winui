@@ -26,7 +26,7 @@
 
   "ReadmePrerequirements": {
     "FreeText": "",
-    "IncludeFilePath": ""
+    "IncludeFilePath": "../ReadmeFiles/ReadmePrerequirements.md"
   },
 
   "ReadmeSetup": {
@@ -75,6 +75,9 @@
       "PasswordCredentials": "Auto",
       "OptionalClaims": {
         "IdTokenClaims": [ "acct" ]
+      },
+      "Sample": {
+        "SampleSubPath": "WinUIMSALApp"
       }
     }
   ],
