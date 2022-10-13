@@ -107,7 +107,6 @@ namespace WinUIMSALApp
                 await DisplayMessageAsync($"Error Acquiring Token Silently:{System.Environment.NewLine}{ex}");
                 return;
             }
-
         }
 
         /// <summary>

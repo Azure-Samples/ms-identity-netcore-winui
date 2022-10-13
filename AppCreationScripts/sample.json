@@ -72,7 +72,10 @@
       "Name": "WinUI-App-Calling-MsGraph",
       "Kind": "WinUI",
       "Audience": "AzureADMyOrg",
-      "PasswordCredentials": "Auto"
+      "PasswordCredentials": "Auto",
+      "OptionalClaims": {
+        "IdTokenClaims": [ "acct" ]
+      }
     }
   ],
 
