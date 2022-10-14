@@ -201,7 +201,7 @@ Function ConfigureApplications
    $clientAadApplication = New-MgApplication -DisplayName "WinUI-App-Calling-MsGraph" `
                                                       -PublicClient `
                                                       @{ `
-                                                      RedirectUris = "ms-appx-web://microsoft.aad.brokerplugin/{ClientId}";
+                                                      RedirectUris = "ms-appx-web://microsoft.aad.brokerplugin/{ClientId}"; `
                                                         } `
                                                        -SignInAudience AzureADMyOrg `
                                                       #end of command

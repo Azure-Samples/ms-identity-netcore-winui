@@ -2,9 +2,6 @@
   "profiles": {
     "WinUIMSALApp (Package)": {
       "commandName": "MsixPackage"
-    },
-    "WinUIMSALApp (Unpackaged)": {
-      "commandName": "Project"
     }
   }
 }
