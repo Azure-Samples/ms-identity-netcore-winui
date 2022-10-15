@@ -1,7 +1,7 @@
 {
   "Sample": {
     "Author": "v-abeyderman",
-    "Title": "WinUi desktop application with MSAL",
+    "Title": "WinUI desktop application with MSAL",
     "Level": 300,
     "Client": "ASP.NET Core Web App",
     "Service": "ASP.NET Core Web API",
