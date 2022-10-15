@@ -6,4 +6,10 @@
 
  It might be helpful to read [Initial project creation instructions](https://learn.microsoft.com/windows/apps/winui/winui3/create-your-first-winui3-app) as well.
 
- 
+ Adding MSAL
+
+
+ Adding Token Cache
+
+
+ Adding Logging
