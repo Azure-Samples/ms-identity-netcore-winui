@@ -24,4 +24,6 @@
 
   **So make sure to sign-out every time before closing the UI.**
 
+  [LINK FOR SURVEY HERE]
+
 </details>

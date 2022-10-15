@@ -40,7 +40,7 @@
 
   /* It either can be a text or link to another readme file */
   "ReadmeTroubleshooting": {
-    "IncludeFilePath": "../ReadmeFiles/ReadmeTroubleshooting.md"
+    "IncludeFilePath": ""
   },
 
   /* It either can be a text or link to another readme file */
