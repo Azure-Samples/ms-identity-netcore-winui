@@ -37,7 +37,8 @@ After creating the configuration file add the below lines after call to `Initial
 
 ### Adding MSAL support and logging
 
-[MSAL.NET for public clients](https://learn.microsoft.com/azure/active-directory/develop/msal-net-initializing-client-applications) is used to Authenticate with Azure AD to gain access token to MsGraph API. Create a Public Client application by adding the below code immediately after configuration lines:
+[MSAL.NET for public clients](https://learn.microsoft.com/azure/active-directory/develop/msal-net-initializing-client-applications) is used to Authenticate with Azure AD to gain access token to MsGraph API. 
+Install `Microsoft.Identity.Client.Extensions.Msal` package and create a Public Client application by adding the below code immediately after configuration lines:
 
 ```csharp
  _PublicClientApp = PublicClientApplicationBuilder.Create(_winUiSettings.ClientId)
@@ -53,10 +54,31 @@ Refer to the [sample source code](https://github.com/Azure-Samples/ms-identity-n
 
 ### Adding Token Cache
 
-[Token Cache](https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/wiki/Cross-platform-Token-Cache#configuring-the-token-cache) isused to enhance user experience by skipping authentication part if the user is logging-in within Access Token expiry period. Add the below code immediately after Public Client creation code:
+[Token Cache](https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/wiki/Cross-platform-Token-Cache#configuring-the-token-cache) issued to enhance user experience by skipping authentication part if the user is logging-in within Access Token expiry period. Add the below code immediately after Public Client creation code:
 
 ```csharp
 var storageProperties = new StorageCreationPropertiesBuilder(_winUiSettings.CacheFileName, _winUiSettings.CacheDir).Build();
 Task.Run(async () => await MsalCacheHelper.CreateAsync(storageProperties)).Result.RegisterCache(_PublicClientApp.UserTokenCache);
 ```
 
+At the end of [MainWindow()](https://github.com/Azure-Samples/ms-identity-netcore-winui/blob/f98f3170b3759e812fdd320cead851e2c73e15d5/WinUIMSALApp/MainWindow.xaml.cs#L47) method the application tries to obtain current user account and set Sign-in button text accordingly.
+
+### User sign-In process
+
+Before calling MsGraph API, user should authenticate. The process is started by calling `SignInAndInitializeGraphServiceClient()` method that will attempt to authenticate and create MSGraph client object. There are 2 ways to obtain the token:
+
+- `AcquireTokenSilent()` - where the application tries to obtain the access token from token cache
+- `AcquireTokenInteractive()` - in case of `AcquireTokenSilent()` failed with [MsalUiRequiredException](https://learn.microsoft.com/dotnet/api/microsoft.identity.client.msaluirequiredexception?view=azure-dotnet). In this case user will be offered to type their credentials into a standard authentication UI dialog box.
+
+### Calling MsGraph API
+
+To be able to call for the [MsGraph API](https://learn.microsoft.com/graph/use-the-api), the `Microsoft.Graph` package must be installed. Then the below code inside `CallGraphButton_Click()` method is called:
+
+```csharp
+ GraphServiceClient graphClient = await SignInAndInitializeGraphServiceClient(_winUiSettings.Scopes.Split(' '));
+ User graphUser = await graphClient.Me.Request().GetAsync();
+```
+
+### Additional code
+
+Take a look into [MainWindow.xaml.cs](https://github.com/Azure-Samples/ms-identity-netcore-winui/blob/main/WinUIMSALApp/MainWindow.xaml.cs) and learn how Sign-in/Sign-out buttons callback functions are being used to call MsGraph API and manage user authentication state.
