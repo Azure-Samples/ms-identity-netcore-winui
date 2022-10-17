@@ -24,6 +24,6 @@
 
   **So make sure to sign-out every time before closing the UI.**
 
-  [LINK FOR SURVEY HERE]
+  [Consider taking a moment to share your experience with us.](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUN0Q5NkFVUFBDVTZTNkhSUkEzUk9aM0szQiQlQCN0PWcu)
 
 </details>
