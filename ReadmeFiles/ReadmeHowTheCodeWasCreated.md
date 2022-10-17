@@ -1,5 +1,9 @@
 ## How the code was created
 
+<details>
+
+<summary>Expand the section</summary>
+
  The current sample is based on [UWP sample](https://github.com/Azure-Samples/active-directory-dotnet-native-uwp-v2) in terms of UI and logical structure - it is similar for both.
 
  To build an initial project, you can use [WinUI 3 Templates for Visual Studio](https://learn.microsoft.com/windows/apps/winui/winui3/winui-project-templates-in-visual-studio)
@@ -82,3 +86,5 @@ To be able to call for the [MsGraph API](https://learn.microsoft.com/graph/use-t
 ### Additional code
 
 Take a look into [MainWindow.xaml.cs](https://github.com/Azure-Samples/ms-identity-netcore-winui/blob/main/WinUIMSALApp/MainWindow.xaml.cs) and learn how Sign-in/Sign-out buttons callback functions are being used to call MsGraph API and manage user authentication state.
+
+</details>
