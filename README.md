@@ -1,23 +1,25 @@
 ---
 page_type: sample
-services: ms-identity
-client: ASP.NET Core Web App
-service: ASP.NET Core Web API
-level: 300
-languages:
-- csharp
-products:
-- products here
-platform: Windows
-endpoint: AAD v2.0
-urlFragment: ms-identity-netcore-winui
-name: WinUI desktop application with MSAL
+name: Authenticate users with MSAL.NET in a WinUI desktop application 
 description: This sample demonstrates how to use the [Microsoft Authentication Library (MSAL) for .NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) to get an access token and call the Microsoft Graph using the MS Graph SDK from a Universal Windows Platform (UWP) application.
+- languages:
+    -  csharp
+products:
+    - azure-active-directory
+    - msal-net
+    - Windows
+    - WinUI
+urlFragment: ms-identity-netcore-winui
+extensions:
+- services: ms-identity
+- platform: WinUI
+- endpoint: AAD v2.0
+- level: 100
+- client: WinUI Desktop app
+- service: Microsoft Graph
 ---
 
-# WinUI desktop application with MSAL
-
-[![Build status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/AAD%20Samples/.NET%20client%20samples/ASP.NET%20Core%20Web%20App%20tutorial)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=XXX)
+# Authenticate users with MSAL.NET in a WinUI desktop application
 
 * [Overview](#overview)
 * [Scenario](#scenario)
@@ -33,14 +35,16 @@ description: This sample demonstrates how to use the [Microsoft Authentication L
 
 ## Overview
 
-This sample demonstrates a ASP.NET Core Web App calling a ASP.NET Core Web API that is secured using Azure AD.
+This sample demonstrates a WinUI Desktop app signing-in users and calling the Microsoft Graph on their behalf.
+
+> :information_source: See the community call: [An introduction to Microsoft Graph for developers](https://www.youtube.com/watch?v=EBbnpFdB92A)
 
 ## Scenario
 
-This sample demonstrates a ASP.NET Core Web App calling a ASP.NET Core Web API that is secured using Azure AD.
+This sample demonstrates a WinUI Desktop app signing-in users and calling the Microsoft Graph on their behalf.
 
-1. The client ASP.NET Core Web App uses the [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) to sign-in a user and obtain a JWT [Access Token](https://aka.ms/access-tokens) from **Azure AD**.
-1. The access token is used as a *bearer* token to authorize the user to call the ASP.NET Core Web API protected by **Azure AD**.
+1. The client WinUI Desktop app uses the [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) to sign-in a user and obtain a JWT [Access Token](https://aka.ms/access-tokens) from **Azure AD**.
+1. The access token is used as a *bearer* token to authorize the user to call the Microsoft Graph protected by **Azure AD**.
 1. The service uses the [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) to protect the Web api, check permissions and validate tokens.
 
 ![Scenario Image](./ReadmeFiles/topology.png)
@@ -51,8 +55,6 @@ This sample demonstrates a ASP.NET Core Web App calling a ASP.NET Core Web API t
 * An **Azure AD** tenant. For more information, see: [How to get an Azure AD tenant](https://docs.microsoft.com/azure/active-directory/develop/test-setup-environment#get-a-test-tenant)
 * A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**. If you're signed in to the [Azure portal](https://portal.azure.com) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
 * [Windows App SDK C# VS2022 Templates](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads)
-
-
 
 ## Setup the sample
 
@@ -140,8 +142,8 @@ To manually register the apps, as a first step you'll need to:
 1. Still on the same app registration, select the **Token configuration** blade to the left.
 1. Select **Add optional claim**:
     1. Select **optional claim type**, then choose **ID**.
-    1. Select the optional claim **acct**. 
-    > Provides user's account status in tenant. If the user is a **member** of the tenant, the value is 0. If they're a **guest**, the value is 1.
+    1. Select the optional claim **acct**.
+    > Provides user's account status in tenant. If the user is a **member** of the tenant, the value is *0*. If they're a **guest**, the value is *1*.
     1. Select **Add** to save your changes.
 
 ##### Configure the client app (WinUI-App-Calling-MsGraph) to use your app registration
@@ -153,6 +155,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 1. Open the `WinUIMSALApp\appsettings.json` file.
 1. Find the key `TenantId` and replace the existing value with your Azure AD tenant/directory ID.
 1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of `WinUI-App-Calling-MsGraph` app copied from the Azure portal.
+
 ### Variation: web app using client certificates
 
 Follow [README-use-certificate.md](README-use-certificate.md) to know how to use this option.
@@ -202,9 +205,6 @@ From your shell or command line, execute the following commands:
 <details>
 	<summary>Expand for troubleshooting info</summary>
 
-ASP.NET core applications create session cookies that represent the identity of the caller. Some Safari users using iOS 12 had issues which are described in ASP.NET Core #4467 and the Web kit bugs database Bug 188165 - iOS 12 Safari breaks ASP.NET Core 2.1 OIDC authentication.
-
-If your web site needs to be accessed from users using iOS 12, you probably want to disable the SameSite protection, but also ensure that state changes are protected with CSRF anti-forgery mechanism. See the how to fix section of Microsoft Security Advisory: iOS12 breaks social, WSFed and OIDC logins #4647
 </details>
 
 ## About the code
@@ -365,9 +365,6 @@ Take a look into [MainWindow.xaml.cs](https://github.com/Azure-Samples/ms-identi
 
 Learn how to:
 
-* [Change your app to sign-in users from any organization or Microsoft accounts](https://github.com/Azure-Samples/active-directory-aspnetcore-webapp-openidconnect-v2/tree/master/1-WebApp-OIDC/1-3-AnyOrgOrPersonal)
-* [Enable users from National clouds to sign-in to your application](https://github.com/Azure-Samples/active-directory-aspnetcore-webapp-openidconnect-v2/tree/master/1-WebApp-OIDC/1-4-Sovereign)
-* [Enable your web app to call a web API on behalf of the signed-in user](https://github.com/Azure-Samples/ms-identity-dotnetcore-ca-auth-context-app)
 
 ## Contributing
 

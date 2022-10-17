@@ -1,17 +1,17 @@
 {
   "Sample": {
     "Author": "v-abeyderman",
-    "Title": "WinUI desktop application with MSAL",
-    "Level": 300,
-    "Client": "ASP.NET Core Web App",
-    "Service": "ASP.NET Core Web API",
+    "Title": "Authenticate users with MSAL.NET in a WinUI desktop application ",
+    "Level": 100,
+    "Client": "WinUI Desktop app",
+    "Service": "Microsoft Graph",
     "RepositoryUrl": "ms-identity-netcore-winui",
     "Endpoint": "AAD v2.0",
     "Description": "This sample demonstrates how to use the [Microsoft Authentication Library (MSAL) for .NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) to get an access token and call the Microsoft Graph using the MS Graph SDK from a Universal Windows Platform (UWP) application.",
     "Languages": [ "csharp" ],
-    "Products": [ "products here" ],
-    "Library": [ "Microsoft.Identity.Web" ],
-    "Platform": "Windows"
+    "Products": ["azure-active-directory","msal-net", "Windows", "WinUI"],
+    "Library": [ "msal-net" ],
+    "Platform": "WinUI"
   },
 
   /*
@@ -72,13 +72,20 @@
       "Name": "WinUI-App-Calling-MsGraph",
       "Kind": "WinUI",
       "Audience": "AzureADMyOrg",
-      "PasswordCredentials": "Auto",
       "OptionalClaims": {
         "IdTokenClaims": [ "acct" ]
       },
       "Sample": {
         "SampleSubPath": "WinUIMSALApp"
-      }
+      },
+      "RequiredResourcesAccess": [
+        {
+          "Resource": "Microsoft Graph",
+          "DelegatedPermissions": [
+            "User.Read"
+          ]
+        }
+      ]
     }
   ],
 
