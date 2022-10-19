@@ -41,7 +41,7 @@ After creating the configuration file add the below lines after call to `Initial
 
 ### Adding MSAL support and logging
 
-[MSAL.NET for public clients](https://learn.microsoft.com/azure/active-directory/develop/msal-net-initializing-client-applications) is used to Authenticate with Azure AD to gain access token to MsGraph API. 
+[MSAL.NET for public clients](https://learn.microsoft.com/azure/active-directory/develop/msal-net-initializing-client-applications) is used to Authenticate with Azure AD to gain access token to MSGraph API. 
 Install `Microsoft.Identity.Client.Extensions.Msal` package and create a Public Client application by adding the below code immediately after configuration lines:
 
 ```csharp
@@ -69,14 +69,14 @@ At the end of [MainWindow()](https://github.com/Azure-Samples/ms-identity-netcor
 
 ### User sign-In process
 
-Before calling MsGraph API, user should authenticate. The process is started by calling `SignInAndInitializeGraphServiceClient()` method that will attempt to authenticate and create MSGraph client object. There are 2 ways to obtain the token:
+Before calling MSGraph API, user should authenticate. The process is started by calling `SignInAndInitializeGraphServiceClient()` method that will attempt to authenticate and create MSGraph client object. There are 2 ways to obtain the token:
 
 - `AcquireTokenSilent()` - where the application tries to obtain the access token from token cache
 - `AcquireTokenInteractive()` - in case of `AcquireTokenSilent()` failed with [MsalUiRequiredException](https://learn.microsoft.com/dotnet/api/microsoft.identity.client.msaluirequiredexception?view=azure-dotnet). In this case user will be offered to type their credentials into a standard authentication UI dialog box.
 
-### Calling MsGraph API
+### Calling MSGraph API
 
-To be able to call for the [MsGraph API](https://learn.microsoft.com/graph/use-the-api), the `Microsoft.Graph` package must be installed. Then the below code inside `CallGraphButton_Click()` method is called:
+To be able to call for the [MSGraph API](https://learn.microsoft.com/graph/use-the-api), the `Microsoft.Graph` package must be installed. Then the below code inside `CallGraphButton_Click()` method is called:
 
 ```csharp
  GraphServiceClient graphClient = await SignInAndInitializeGraphServiceClient(_winUiSettings.Scopes.Split(' '));
@@ -85,6 +85,6 @@ To be able to call for the [MsGraph API](https://learn.microsoft.com/graph/use-t
 
 ### Additional code
 
-Take a look into [MainWindow.xaml.cs](https://github.com/Azure-Samples/ms-identity-netcore-winui/blob/main/WinUIMSALApp/MainWindow.xaml.cs) and learn how Sign-in/Sign-out buttons callback functions are being used to call MsGraph API and manage user authentication state.
+Take a look into [MainWindow.xaml.cs](https://github.com/Azure-Samples/ms-identity-netcore-winui/blob/main/WinUIMSALApp/MainWindow.xaml.cs) and learn how Sign-in/Sign-out buttons callback functions are being used to call MSGraph API and manage user authentication state.
 
 </details>

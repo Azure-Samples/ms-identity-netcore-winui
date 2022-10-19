@@ -24,6 +24,6 @@
 
   **So make sure to sign-out every time before closing the UI.**
 
-  [Consider taking a moment to share your experience with us.](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUN0Q5NkFVUFBDVTZTNkhSUkEzUk9aM0szQiQlQCN0PWcu)
+  [Azure AD code sample survey - A .NET Core WinUI application that can consume Microsoft Graph or your own Web Api using Microsoft Identity Platform to acquire tokens](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUN0Q5NkFVUFBDVTZTNkhSUkEzUk9aM0szQiQlQCN0PWcu)
 
 </details>
