@@ -42,6 +42,11 @@
   },
 
   /* It either can be a text or link to another readme file */
+  "ReadmeNextSteps": {
+    "IncludeFilePath": "../ReadmeFiles/ReadmeNextSteps.md"
+  },
+
+  /* It either can be a text or link to another readme file */
   "ReadmeHowTheCodeWasCreated": {
     "IncludeFilePath": "../ReadmeFiles/ReadmeHowTheCodeWasCreated.md"
   },
