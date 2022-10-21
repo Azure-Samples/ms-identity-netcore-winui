@@ -43,7 +43,7 @@
 
   /* It either can be a text or link to another readme file */
   "ReadmeNextSteps": {
-    "IncludeFilePath": "../ReadmeFiles/ReadmeNextSteps.md"
+    "IncludeFilePath": ""
   },
 
   /* It either can be a text or link to another readme file */

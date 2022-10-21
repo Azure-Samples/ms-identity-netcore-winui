@@ -27,6 +27,7 @@ description: This sample demonstrates how to use the [Microsoft Authentication L
 * [Prerequisites](#prerequisites)
 * [Setup the sample](#setup-the-sample)
 * [Explore the sample](#explore-the-sample)
+* [Troubleshooting](#troubleshooting)
 * [About the code](#about-the-code)
 * [How the code was created](#how-the-code-was-created)
 * [Contributing](#contributing)
@@ -151,6 +152,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 1. Open the `WinUIMSALApp\appsettings.json` file.
 1. Find the key `TenantId` and replace the existing value with your Azure AD tenant/directory ID.
 1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of `WinUI-App-Calling-MsGraph` app copied from the Azure portal.
+
 ### Step 4: Running the sample
 
     Open the solution in Visual Studio and start it by pressing F5 to debug or Ctrl+F5 without debug.
@@ -185,7 +187,17 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 </details>
 
+## Troubleshooting
 
+<details>
+ <summary>Expand for troubleshooting info</summary>
+
+> * Use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) to get support from the community.
+Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
+Make sure that your questions or comments are tagged with [`azure-active-directory` `winui` `ms-identity` `adal` `msal`].
+
+If you find a bug in the sample, raise the issue on [GitHub Issues](../../../../issues).
+</details>
 
 ## About the code
 
@@ -340,9 +352,6 @@ Take a look into [MainWindow.xaml.cs](https://github.com/Azure-Samples/ms-identi
 
 </details>
 
-
-Could not find file 'C:\Github\Azure-Samples\ms-identity-netcore-winui\ReadmeFiles\ReadmeNextSteps.md'.
-
 ## Contributing
 
 If you'd like to contribute to this sample, see [CONTRIBUTING.MD](/CONTRIBUTING.md).
@@ -351,23 +360,22 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Learn more
 
- [WinUi open source project](https://github.com/microsoft/microsoft-ui-xaml)
-
- [ILogging interface](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging)
-
- [MSGraph API](https://learn.microsoft.com/graph/use-the-api)
-
-  *To learn more about the code, visit:
-  *[Conceptual documentation for MSAL.NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#conceptual-documentation) and in particular:
-  *[Acquiring tokens with authorization codes on web apps](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Acquiring-tokens-with-authorization-codes-on-web-apps)
-  *[Customizing Token cache serialization](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization)
-
-  *To learn more about security in aspnetcore,
-  *[Introduction to Identity on ASP.NET Core](https://docs.microsoft.com/aspnet/core/security/authentication/identity)
-  *[AuthenticationBuilder](https://docs.microsoft.com/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder)
-  *[Azure Active Directory with ASP.NET Core](https://docs.microsoft.com/aspnet/core/security/authentication/azure-active-directory)
-  *[Protected web API: Verify scopes and app roles](https://docs.microsoft.com/azure/active-directory/develop/scenario-protected-web-api-verification-scope-app-roles?tabs=aspnetcore)
-
-
-
-
+* [WinUi open source project](https://github.com/microsoft/microsoft-ui-xaml)
+* [ILogging interface](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging)
+* [MSGraph API](https://learn.microsoft.com/graph/use-the-api)
+* [Microsoft identity platform (Azure Active Directory for developers)](https://docs.microsoft.com/azure/active-directory/develop/)
+* [Azure AD code samples](https://docs.microsoft.com/azure/active-directory/develop/sample-v2-code)
+* [Overview of Microsoft Authentication Library (MSAL)](https://docs.microsoft.com/azure/active-directory/develop/msal-overview)
+* [Register an application with the Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app)
+  
+* To learn more about the code, visit:
+  * [Conceptual documentation for MSAL.NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#conceptual-documentation) and in particular:
+  * [Acquiring tokens with authorization codes on web apps](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Acquiring-tokens-with-authorization-codes-on-web-apps)
+  * [Customizing Token cache serialization](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization)
+  
+  * [Quickstart: Register an application with the Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app)
+  *  [Understanding Azure AD application consent experiences](https://docs.microsoft.com/azure/active-directory/develop/application-consent-experience)
+  * [Understand user and admin consent](https://docs.microsoft.com/azure/active-directory/develop/howto-convert-app-to-be-multi-tenant#understand-user-and-admin-consent)
+  * [Application and service principal objects in Azure Active Directory](https://docs.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals)
+  * [Authentication Scenarios for Azure AD](https://docs.microsoft.com/azure/active-directory/develop/authentication-flows-app-scenarios)
+  * [Building Zero Trust ready apps](https://aka.ms/ztdevsession)
