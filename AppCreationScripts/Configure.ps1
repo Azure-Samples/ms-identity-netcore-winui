@@ -110,45 +110,6 @@ Function UpdateTextFile([string] $configFilePath, [System.Collections.HashTable]
 
     Set-Content -Path $configFilePath -Value $lines -Force
 }
-<#.Description
-   This function takes a string input as a single line, matches a key value and replaces with the replacement value
-#> 
-Function UpdateLine([string] $line, [string] $value)
-{
-    $index = $line.IndexOf(':')
-    $lineEnd = ''
-
-    if($line[$line.Length - 1] -eq ','){   $lineEnd = ',' }
-    
-    if ($index -ige 0)
-    {
-        $line = $line.Substring(0, $index+1) + " " + '"' + $value+ '"' + $lineEnd
-    }
-    return $line
-}
-
-<#.Description
-   This function takes a dictionary of keys to search and their replacements and replaces the placeholders in a text file
-#> 
-Function UpdateTextFile([string] $configFilePath, [System.Collections.HashTable] $dictionary)
-{
-    $lines = Get-Content $configFilePath
-    $index = 0
-    while($index -lt $lines.Length)
-    {
-        $line = $lines[$index]
-        foreach($key in $dictionary.Keys)
-        {
-            if ($line.Contains($key))
-            {
-                $lines[$index] = UpdateLine $line $dictionary[$key]
-            }
-        }
-        $index++
-    }
-
-    Set-Content -Path $configFilePath -Value $lines -Force
-}
 
 <#.Description
    This function takes a string as input and creates an instance of an Optional claim object

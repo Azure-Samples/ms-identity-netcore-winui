@@ -1,21 +1,22 @@
 ---
 page_type: sample
-services: ms-identity
-client: WinUI Desktop app
-service: 
-level: 100
-languages:
-- csharp
-products:
-- azure-active-directory
-- msal-net
-- Windows
-- WinUI
-platform: WinUI
-endpoint: AAD v2.0
-urlFragment: ms-identity-netcore-winui
 name: Authenticate users with MSAL.NET in a WinUI desktop application 
 description: This sample demonstrates how to use the [Microsoft Authentication Library (MSAL) for .NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) to get an access token and call the Microsoft Graph using the MS Graph SDK from a Universal Windows Platform (UWP) application.
+- languages:
+    -  csharp
+products:
+    - azure-active-directory
+    - msal-net
+    - Windows
+    - WinUI
+urlFragment: ms-identity-netcore-winui
+extensions:
+- services: ms-identity
+- platform: WinUI
+- endpoint: AAD v2.0
+- level: 100
+- client: WinUI Desktop app
+- service: 
 ---
 
 # Authenticate users with MSAL.NET in a WinUI desktop application 
@@ -126,21 +127,21 @@ To manually register the apps, as a first step you'll need to:
         The **ClientId** is the Id of the App Registration and can be found under **Overview/Application (client) ID**
     1. Click **Save** to save your changes.
 1. Since this app signs-in users, we will now proceed to select **delegated permissions**, which is is required by apps signing-in users.
-   1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs:
-   1. Select the **Add a permission** button and then:
-   1. Ensure that the **Microsoft APIs** tab is selected.
-   1. In the *Commonly used Microsoft APIs* section, select **Microsoft Graph**
-      * Since this app signs-in users, we will now proceed to select **delegated permissions**, which is is requested by apps when signing-in users.
-           1. In the **Delegated permissions** section, select **User.Read** in the list. Use the search box if necessary.
-   1. Select the **Add permissions** button at the bottom.
+    1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs:
+    1. Select the **Add a permission** button and then:
+    1. Ensure that the **Microsoft APIs** tab is selected.
+    1. In the *Commonly used Microsoft APIs* section, select **Microsoft Graph**
+      * Since this app signs-in users, we will now proceed to select **delegated permissions**, which is requested by apps that sign-in users.
+      * In the **Delegated permissions** section, select **User.Read** in the list. Use the search box if necessary.
+    1. Select the **Add permissions** button at the bottom.
 
 ##### Configure Optional Claims
 
 1. Still on the same app registration, select the **Token configuration** blade to the left.
 1. Select **Add optional claim**:
     1. Select **optional claim type**, then choose **ID**.
-    1. Select the optional claim **acct**. 
-    > Provides user's account status in tenant. If the user is a **member** of the tenant, the value is 0. If they're a **guest**, the value is 1.
+    1. Select the optional claim **acct**.
+    > Provides user's account status in tenant. If the user is a **member** of the tenant, the value is *0*. If they're a **guest**, the value is *1*.
     1. Select **Add** to save your changes.
 
 ##### Configure the client app (WinUI-App-Calling-MsGraph) to use your app registration
@@ -351,6 +352,9 @@ To be able to call for the [MSGraph API](https://learn.microsoft.com/graph/use-t
 Take a look into [MainWindow.xaml.cs](https://github.com/Azure-Samples/ms-identity-netcore-winui/blob/main/WinUIMSALApp/MainWindow.xaml.cs) and learn how Sign-in/Sign-out buttons callback functions are being used to call MSGraph API and manage user authentication state.
 
 </details>
+
+
+
 
 ## Contributing
 
