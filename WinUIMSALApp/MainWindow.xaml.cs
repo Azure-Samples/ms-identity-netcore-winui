@@ -100,11 +100,11 @@ namespace WinUIMSALApp
             }
             catch (MsalException msalEx)
             {
-                await DisplayMessageAsync($"Error Acquiring Token:{System.Environment.NewLine}{msalEx}");
+                DisplayMessageAsync($"Error Acquiring Token:{Environment.NewLine}{msalEx}");
             }
             catch (Exception ex)
             {
-                await DisplayMessageAsync($"Error Acquiring Token Silently:{System.Environment.NewLine}{ex}");
+                DisplayMessageAsync($"Error Acquiring Token Silently:{Environment.NewLine}{ex}");
                 return;
             }
         }
@@ -116,7 +116,7 @@ namespace WinUIMSALApp
         /// <returns> Access Token</returns>
         private async Task<string> SignInUserAndGetTokenUsingMSAL(string[] scopes)
         {
-            _currentUserAccount = _currentUserAccount ?? (await _PublicClientApp.GetAccountsAsync()).FirstOrDefault();
+            _currentUserAccount ??= (await _PublicClientApp.GetAccountsAsync()).FirstOrDefault();
 
             try
             {
@@ -199,9 +199,9 @@ namespace WinUIMSALApp
         /// <summary>
         /// Displays a message in the ResultText. Can be called from any thread.
         /// </summary>
-        private async Task DisplayMessageAsync(string message)
+        private void DisplayMessageAsync(string message)
         {
-            await Task.Run(() => DispatcherQueue.TryEnqueue(() => { ResultText.Text = message; }));
+            DispatcherQueue.TryEnqueue(() => { ResultText.Text = message; });
         }
     }
 }
