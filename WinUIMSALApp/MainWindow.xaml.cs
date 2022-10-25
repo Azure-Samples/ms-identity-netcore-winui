@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.Extensions.Configuration;
 using WinUIMSALApp.Configuration;
 using WinUIMSALApp.Logging;
+using Microsoft.Identity.Client.Broker;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -57,6 +58,9 @@ namespace WinUIMSALApp
                 .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
                 //if not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
                 .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId))
+                //Using WAM - https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview
+                .WithBrokerPreview(true)
+                .WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); })
                 //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
                 .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
                 .Build();
@@ -121,7 +125,7 @@ namespace WinUIMSALApp
             try
             {
                 _authResult = await _publicClientApp.AcquireTokenSilent(scopes, _currentUserAccount)
-                                                  .ExecuteAsync();
+                    .ExecuteAsync();
 
                 DispatcherQueue.TryEnqueue(() =>
                 {
