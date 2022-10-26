@@ -1,7 +1,6 @@
 ## Explore the sample
 
 <details>
-
  <summary>Expand the section</summary>
 
   Start running the sample by pressing `WinUIMSALApp (Package)` button on Visual Studio menu bar.

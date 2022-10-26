@@ -54,8 +54,6 @@ This sample demonstrates a WinUI Desktop app that authenticates users against Az
 * A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**. If you're signed in to the [Azure portal](https://portal.azure.com) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
 * [Windows App SDK C# VS2022 Templates](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads)
 
-
-
 ## Setup the sample
 
 ### Step 1: Clone or download this repository
@@ -69,7 +67,6 @@ git clone https://github.com/Azure-Samples/ms-identity-netcore-winui.git
 or download and extract the repository *.zip* file.
 
 > :warning: To avoid path length limitations on Windows, we recommend cloning into a directory near the root of your drive.
-
 
 ### Step 3: Register the sample application(s) in your tenant
 
@@ -131,7 +128,7 @@ To manually register the apps, as a first step you'll need to:
     1. Select the **Add a permission** button and then:
     1. Ensure that the **Microsoft APIs** tab is selected.
     1. In the *Commonly used Microsoft APIs* section, select **Microsoft Graph**
-      * Since this app signs-in users, we will now proceed to select **delegated permissions**, which is requested by apps that sign-in users.
+      * Since this app signs-in users, we will now proceed to select **delegated permissions**, which is requested by apps that signs-in users.
       * In the **Delegated permissions** section, select **User.Read** in the list. Use the search box if necessary.
     1. Select the **Add permissions** button at the bottom.
 
@@ -156,12 +153,11 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 ### Step 4: Running the sample
 
-    Open the solution in Visual Studio and start it by pressing F5 to debug or Ctrl+F5 without debug.
+Open the solution in Visual Studio and start it by pressing F5 to debug or Ctrl+F5 without debug.
 
 ## Explore the sample
 
 <details>
-
  <summary>Expand the section</summary>
 
   Start running the sample by pressing `WinUIMSALApp (Package)` button on Visual Studio menu bar.
@@ -188,10 +184,47 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 </details>
 
+## Using Web Account Manager (WAM)
+
+MSAL is able to call [Web Account Manager](https://learn.microsoft.com/windows/uwp/security/web-account-manager), a Windows 10 component that ships with the OS. This component acts as an authentication broker and users of your app benefit from integration with accounts known from Windows, such as the account you signed-in with in your Windows session.
+
+### WAM value proposition
+
+Using an authentication broker such as WAM has numerous benefits.
+
+- Enhanced security (your app doesn't have to manage the powerful refresh token)
+- Better support for Windows Hello, Conditional Access and FIDO keys
+- Integration with Windows' "Email and Accounts" view
+- Better Single Sign-On (users don't have to reenter passwords)
+- Most bug fixes and enhancements will be shipped with Windows
+
+### WAM limitations
+
+- B2C and ADFS authorities aren't supported. MSAL will fall back to a browser.
+- Available on Win10+ and Win Server 2019+. On Mac, Linux, and earlier versions of Windows, MSAL will fall back to a browser.
+- Not available on Xbox.
+
 ## Troubleshooting
 
 <details>
  <summary>Expand for troubleshooting info</summary>
+ 
+### "Either the user canceled the authentication or the WAM Account Picker crashed because the app is running in an elevated process" error message
+
+When an app that uses MSAL is run as an elevated process, some of these calls within WAM may fail due to different process security levels. Internally MSAL.NET uses native Windows methods ([COM](/windows/win32/com/the-component-object-model)) to integrate with WAM. Starting with version 4.32.0, MSAL will display a descriptive error message when it detects that the app process is elevated and WAM returned no accounts.
+
+One solution is to not run the app as elevated, if possible. Another solution is for the app developer to call `WindowsNativeUtils.InitializeProcessSecurity` method when the app starts up. This will set the security of the processes used by WAM to the same levels. See [this sample app](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/tests/devapps/WAM/NetCoreWinFormsWam/Program.cs#L18-L21) for an example. However, note, that this solution isn't guaranteed to succeed to due external factors like the underlying CLR behavior. In that case, an `MsalClientException` will be thrown. For more information, see issue [#2560](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2560).
+
+### "WAM Account Picker did not return an account" error message
+
+This message indicates that either the application user closed the dialog that displays accounts, or the dialog itself crashed. A crash might occur if AccountsControl, a Windows control, is registered incorrectly in Windows. To resolve this issue:
+
+1. In the taskbar, right-click **Start**, and then select **Windows PowerShell (Admin)**.
+1. If you're prompted by a User Account Control (UAC) dialog, select **Yes** to start PowerShell.
+1. Copy and then run the following script:
+
+   ```powershell
+   if (-not (Get-AppxPackage Microsoft.AccountsControl)) { Add-AppxPackage -Register "$env:windir\SystemApps\Microsoft.AccountsControl_cw5n1h2txyewy\AppxManifest.xml" -DisableDevelopmentMode -ForceApplicationShutdown } Get-AppxPackage Microsoft.AccountsControl
 
 > * Use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) to get support from the community.
 Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
@@ -206,7 +239,7 @@ If you find a bug in the sample, raise the issue on [GitHub Issues](../../../../
  <summary>Expand the section</summary>
 For general information about how the project is organized, refer to the [tutorial](https://learn.microsoft.com/windows/apps/winui/winui3/create-your-first-winui3-app)
 
-The constuctor of `MainWindow` class was modified by adding a configuration, MSAL Authentication and token caching capability:
+The constructor of `MainWindow` class was modified by adding a configuration, MSAL Authentication and token caching capability:
 
 ```csharp
    
@@ -216,8 +249,7 @@ The constuctor of `MainWindow` class was modified by adding a configuration, MSA
     
     _PublicClientApp = PublicClientApplicationBuilder.Create(_winUiSettings.ClientId)
         .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
-        .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId))
- 
+        .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId)) 
         .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) 
         .Build();
 
@@ -258,6 +290,28 @@ To understand more how the buttons are linked to the callback functions, open `M
     <Button x:Name="CallGraphButton" Content="Sign-In and Call Microsoft Graph API" HorizontalAlignment="Right" Padding="5" Click="CallGraphButton_Click" Margin="5" FontFamily="Segoe Ui"/>
     <Button x:Name="SignOutButton" Content="Sign-Out" HorizontalAlignment="Right" Padding="5" Click="SignOutButton_Click" Margin="5" Visibility="Collapsed" FontFamily="Segoe Ui"/>
 
+```
+
+### Using the Broker (WAM)
+
+MSAL is also able to call [Web Account Manager](https://learn.microsoft.com/windows/uwp/security/web-account-manager), a Windows 10 component that ships with the OS. This component acts as an authentication broker and users of your app benefit from integration with accounts known from Windows, such as the account you signed-in with in your Windows session.
+
+The constructor of `MainWindow` class can be modified further to utilize WAM for authentication by making the following changes to the code:
+
+```csharp
+   
+    _publicClientApp = PublicClientApplicationBuilder.Create(_winUiSettings.ClientId)
+        .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
+        //if not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
+        .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId))
+
+        //Using WAM - https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview
+        .WithBrokerPreview(true)
+        .WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); })
+        
+        //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
+        .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
+        .Build();
 ```
 
 </details>

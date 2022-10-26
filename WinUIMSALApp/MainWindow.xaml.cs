@@ -59,8 +59,8 @@ namespace WinUIMSALApp
                 //if not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
                 .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId))
                 //Using WAM - https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview
-                .WithBrokerPreview(true)
-                .WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); })
+                //.WithBrokerPreview(true)
+                //.WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); })
                 //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
                 .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
                 .Build();
