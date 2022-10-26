@@ -28,6 +28,7 @@ extensions:
 * [Prerequisites](#prerequisites)
 * [Setup the sample](#setup-the-sample)
 * [Explore the sample](#explore-the-sample)
+* [Using Web Account Manager (WAM)](#using-web-account-manager-(wam))
 * [Troubleshooting](#troubleshooting)
 * [About the code](#about-the-code)
 * [How the code was created](#how-the-code-was-created)
@@ -54,6 +55,8 @@ This sample demonstrates a WinUI Desktop app that authenticates users against Az
 * A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**. If you're signed in to the [Azure portal](https://portal.azure.com) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
 * [Windows App SDK C# VS2022 Templates](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads)
 
+
+
 ## Setup the sample
 
 ### Step 1: Clone or download this repository
@@ -67,6 +70,7 @@ git clone https://github.com/Azure-Samples/ms-identity-netcore-winui.git
 or download and extract the repository *.zip* file.
 
 > :warning: To avoid path length limitations on Windows, we recommend cloning into a directory near the root of your drive.
+
 
 ### Step 3: Register the sample application(s) in your tenant
 
@@ -153,7 +157,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 ### Step 4: Running the sample
 
-Open the solution in Visual Studio and start it by pressing F5 to debug or Ctrl+F5 without debug.
+    Open the solution in Visual Studio and start it by pressing F5 to debug or Ctrl+F5 without debug.
 
 ## Explore the sample
 
@@ -182,27 +186,27 @@ Open the solution in Visual Studio and start it by pressing F5 to debug or Ctrl+
 
   [Azure AD code sample survey - A .NET Core WinUI application that can consume Microsoft Graph or your own Web Api using Microsoft Identity Platform to acquire tokens](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUN0Q5NkFVUFBDVTZTNkhSUkEzUk9aM0szQiQlQCN0PWcu)
 
+  ## Using Web Account Manager (WAM)
+
+  MSAL is able to call [Web Account Manager](https://learn.microsoft.com/windows/uwp/security/web-account-manager), a Windows 10 component that ships with the OS. This component acts as an authentication broker and users of your app benefit from integration with accounts known from Windows, such as the account you signed-in with in your Windows session.
+
+  ### WAM value proposition
+
+  Using an authentication broker such as WAM has numerous benefits.
+
+  - Enhanced security (your app doesn't have to manage the powerful refresh token)
+  - Better support for Windows Hello, Conditional Access and FIDO keys
+  - Integration with Windows' "Email and Accounts" view
+  - Better Single Sign-On (users don't have to reenter passwords)
+  - Most bug fixes and enhancements will be shipped with Windows
+
+  ### WAM limitations
+
+  - B2C and ADFS authorities aren't supported. MSAL will fall back to a browser.
+  - Available on Win10+ and Win Server 2019+. On Mac, Linux, and earlier versions of Windows, MSAL will fall back to a browser.
+  - Not available on Xbox.
+
 </details>
-
-## Using Web Account Manager (WAM)
-
-MSAL is able to call [Web Account Manager](https://learn.microsoft.com/windows/uwp/security/web-account-manager), a Windows 10 component that ships with the OS. This component acts as an authentication broker and users of your app benefit from integration with accounts known from Windows, such as the account you signed-in with in your Windows session.
-
-### WAM value proposition
-
-Using an authentication broker such as WAM has numerous benefits.
-
-- Enhanced security (your app doesn't have to manage the powerful refresh token)
-- Better support for Windows Hello, Conditional Access and FIDO keys
-- Integration with Windows' "Email and Accounts" view
-- Better Single Sign-On (users don't have to reenter passwords)
-- Most bug fixes and enhancements will be shipped with Windows
-
-### WAM limitations
-
-- B2C and ADFS authorities aren't supported. MSAL will fall back to a browser.
-- Available on Win10+ and Win Server 2019+. On Mac, Linux, and earlier versions of Windows, MSAL will fall back to a browser.
-- Not available on Xbox.
 
 ## Troubleshooting
 
