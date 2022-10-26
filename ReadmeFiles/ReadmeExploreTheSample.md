@@ -25,4 +25,24 @@
 
   [Azure AD code sample survey - A .NET Core WinUI application that can consume Microsoft Graph or your own Web Api using Microsoft Identity Platform to acquire tokens](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUN0Q5NkFVUFBDVTZTNkhSUkEzUk9aM0szQiQlQCN0PWcu)
 
+  ## Using Web Account Manager (WAM)
+
+  MSAL is able to call [Web Account Manager](https://learn.microsoft.com/windows/uwp/security/web-account-manager), a Windows 10 component that ships with the OS. This component acts as an authentication broker and users of your app benefit from integration with accounts known from Windows, such as the account you signed-in with in your Windows session.
+
+  ### WAM value proposition
+
+  Using an authentication broker such as WAM has numerous benefits.
+
+  - Enhanced security (your app doesn't have to manage the powerful refresh token)
+  - Better support for Windows Hello, Conditional Access and FIDO keys
+  - Integration with Windows' "Email and Accounts" view
+  - Better Single Sign-On (users don't have to reenter passwords)
+  - Most bug fixes and enhancements will be shipped with Windows
+
+  ### WAM limitations
+
+  - B2C and ADFS authorities aren't supported. MSAL will fall back to a browser.
+  - Available on Win10+ and Win Server 2019+. On Mac, Linux, and earlier versions of Windows, MSAL will fall back to a browser.
+  - Not available on Xbox.
+
 </details>
