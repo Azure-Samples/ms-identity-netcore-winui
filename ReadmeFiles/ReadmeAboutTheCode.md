@@ -79,4 +79,5 @@ The constructor of `MainWindow` class can be modified further to utilize WAM for
         .Build();
 ```
 
+Refer to [MSAL WAM](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview) for more details on how to write code for this.
 </details>

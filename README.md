@@ -55,8 +55,6 @@ This sample demonstrates a WinUI Desktop app that authenticates users against Az
 * A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**. If you're signed in to the [Azure portal](https://portal.azure.com) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
 * [Windows App SDK C# VS2022 Templates](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads)
 
-
-
 ## Setup the sample
 
 ### Step 1: Clone or download this repository
@@ -70,7 +68,6 @@ git clone https://github.com/Azure-Samples/ms-identity-netcore-winui.git
 or download and extract the repository *.zip* file.
 
 > :warning: To avoid path length limitations on Windows, we recommend cloning into a directory near the root of your drive.
-
 
 ### Step 3: Register the sample application(s) in your tenant
 
@@ -184,27 +181,27 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
   **So make sure to sign-out every time before closing the UI.**
 
-  [Azure AD code sample survey - A .NET Core WinUI application that can consume Microsoft Graph or your own Web Api using Microsoft Identity Platform to acquire tokens](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUN0Q5NkFVUFBDVTZTNkhSUkEzUk9aM0szQiQlQCN0PWcu)
+  [Azure AD code sample survey - A .NET Core WinUI application that signs-in users and calls Microsoft Graph](https://forms.microsoft.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUN0Q5NkFVUFBDVTZTNkhSUkEzUk9aM0szQiQlQCN0PWcu)
 
-  ## Using Web Account Manager (WAM)
+## Using Web Account Manager (WAM)
 
-  MSAL is able to call [Web Account Manager](https://learn.microsoft.com/windows/uwp/security/web-account-manager), a Windows 10 component that ships with the OS. This component acts as an authentication broker and users of your app benefit from integration with accounts known from Windows, such as the account you signed-in with in your Windows session.
+MSAL is able to call [Web Account Manager](https://learn.microsoft.com/windows/uwp/security/web-account-manager), a Windows 10 component that ships with the OS. This component acts as an authentication broker and users of your app benefit from integration with accounts known from Windows, such as the account you signed-in with in your Windows session.
 
-  ### WAM value proposition
+### WAM value proposition
 
-  Using an authentication broker such as WAM has numerous benefits.
+Using an authentication broker such as WAM has numerous benefits.
 
-  - Enhanced security (your app doesn't have to manage the powerful refresh token)
-  - Better support for Windows Hello, Conditional Access and FIDO keys
-  - Integration with Windows' "Email and Accounts" view
-  - Better Single Sign-On (users don't have to reenter passwords)
-  - Most bug fixes and enhancements will be shipped with Windows
+* Enhanced security (your app doesn't have to manage the powerful refresh token)
+* Better support for Windows Hello, Conditional Access and FIDO keys
+* Integration with Windows' "Email and Accounts" view
+* Better Single Sign-On (users don't have to reenter passwords)
+* Most bug fixes and enhancements will be shipped with Windows
 
-  ### WAM limitations
+### WAM limitations
 
-  - B2C and ADFS authorities aren't supported. MSAL will fall back to a browser.
-  - Available on Win10+ and Win Server 2019+. On Mac, Linux, and earlier versions of Windows, MSAL will fall back to a browser.
-  - Not available on Xbox.
+* B2C and ADFS authorities aren't supported. MSAL will fall back to a browser.
+* Available on Win10+ and Win Server 2019+. On Mac, Linux, and earlier versions of Windows, MSAL will fall back to a browser.
+* Not available on Xbox.
 
 </details>
 
@@ -318,6 +315,7 @@ The constructor of `MainWindow` class can be modified further to utilize WAM for
         .Build();
 ```
 
+Refer to [MSAL WAM](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview) for more details on how to write code for this.
 </details>
 
 ## How the code was created
