@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		ReadmeFiles\ReadmeExploreTheSample.md = ReadmeFiles\ReadmeExploreTheSample.md
 		ReadmeFiles\ReadmeHowTheCodeWasCreated.md = ReadmeFiles\ReadmeHowTheCodeWasCreated.md
 		ReadmeFiles\ReadmeLearnMore.md = ReadmeFiles\ReadmeLearnMore.md
+		ReadmeFiles\ReadmeNextSteps.md = ReadmeFiles\ReadmeNextSteps.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinUIMSALApp", "WinUIMSALApp\WinUIMSALApp.csproj", "{81022BE8-CFED-49BB-B4A0-997EB957BFED}"

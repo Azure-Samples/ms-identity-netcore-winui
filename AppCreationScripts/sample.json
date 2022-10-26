@@ -1,17 +1,16 @@
 {
   "Sample": {
     "Author": "v-abeyderman",
-    "Title": "WinUi desktop application with MSAL",
-    "Level": 300,
-    "Client": "ASP.NET Core Web App",
-    "Service": "ASP.NET Core Web API",
+    "Title": "Authenticate users with MSAL.NET in a WinUI desktop application ",
+    "Level": 100,
+    "Client": "WinUI Desktop app",
     "RepositoryUrl": "ms-identity-netcore-winui",
     "Endpoint": "AAD v2.0",
     "Description": "This sample demonstrates how to use the [Microsoft Authentication Library (MSAL) for .NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) to get an access token and call the Microsoft Graph using the MS Graph SDK from a Universal Windows Platform (UWP) application.",
     "Languages": [ "csharp" ],
-    "Products": [ "products here" ],
-    "Library": [ "Microsoft.Identity.Web" ],
-    "Platform": "Windows"
+    "Products": [ "azure-active-directory", "msal-net", "Windows", "WinUI" ],
+    "Library": [ "MSAL.NET" ],
+    "Platform": "WinUI"
   },
 
   /*
@@ -32,7 +31,6 @@
   "ReadmeSetup": {
     "FreeText": "",
     "IncludeFilePath": "",
-    "CertificateOption": "1", /* 1 when a certificate can be used instead of secret*/
     "CreateProjectIncludeFilePath": "",
     "AppRegistrationIncludeFilePath": "",
     "RunSampleIncludeFilePath": ""
@@ -40,12 +38,17 @@
 
   /* It either can be a text or link to another readme file */
   "ReadmeTroubleshooting": {
-    "IncludeFilePath": ""
+    "IncludeFilePath": "../ReadmeFiles/ReadmeTroubleshooting.md"
+  },
+
+  /* It either can be a text or link to another readme file */
+  "ReadmeNextSteps": {
+    "IncludeFilePath": "../ReadmeFiles/ReadmeNextSteps.md"
   },
 
   /* It either can be a text or link to another readme file */
   "ReadmeHowTheCodeWasCreated": {
-    "IncludeFilePath": "../ReadmeFiles/ReadmeHowTheCodeWasCreated.md" 
+    "IncludeFilePath": "../ReadmeFiles/ReadmeHowTheCodeWasCreated.md"
   },
 
   /* It either can be a text or link to another readme file */
@@ -72,13 +75,18 @@
       "Name": "WinUI-App-Calling-MsGraph",
       "Kind": "WinUI",
       "Audience": "AzureADMyOrg",
-      "PasswordCredentials": "Auto",
       "OptionalClaims": {
         "IdTokenClaims": [ "acct" ]
       },
-      "Sample": {
-        "SampleSubPath": "WinUIMSALApp"
-      }
+      "SampleSubPath": "WinUIMSALApp",
+      "RequiredResourcesAccess": [
+        {
+          "Resource": "Microsoft Graph",
+          "DelegatedPermissions": [
+            "User.Read"
+          ]
+        }
+      ]
     }
   ],
 

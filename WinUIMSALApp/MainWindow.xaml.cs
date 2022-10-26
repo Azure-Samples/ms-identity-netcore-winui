@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.Extensions.Configuration;
 using WinUIMSALApp.Configuration;
 using WinUIMSALApp.Logging;
+using Microsoft.Identity.Client.Broker;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -42,7 +43,7 @@ namespace WinUIMSALApp
         private IAccount _currentUserAccount;
 
         // The MSAL Public client app
-        private static IPublicClientApplication _PublicClientApp;
+        private static IPublicClientApplication _publicClientApp;
 
         public MainWindow()
         {
@@ -52,26 +53,36 @@ namespace WinUIMSALApp
             var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
             _winUiSettings = configuration.GetSection("AzureAAD").Get<WinUISettings>();
 
-            // Initialize the MSAL library by building a public client application
-            _PublicClientApp = PublicClientApplicationBuilder.Create(_winUiSettings.ClientId)
-                .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
-                //if not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
-                .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId))
-                //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
-                .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
-                .Build();
-
-            //Cache configuration and hook-up to public application. Refer to https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/wiki/Cross-platform-Token-Cache#configuring-the-token-cache
-            var storageProperties = new StorageCreationPropertiesBuilder(_winUiSettings.CacheFileName, _winUiSettings.CacheDir).Build();
-            Task.Run(async () => await MsalCacheHelper.CreateAsync(storageProperties)).Result.RegisterCache(_PublicClientApp.UserTokenCache);
-
-            _currentUserAccount = Task.Run(async () => await _PublicClientApp.GetAccountsAsync()).Result.FirstOrDefault();
+            _currentUserAccount = Task.Run(async () => await InitializePublicClientAppAsync()).Result;
 
             if (_currentUserAccount != null)
             {
                 this.CallGraphButton.Content = _buttonTextAuthorized;
                 this.SignOutButton.Visibility = Visibility.Visible;
             }
+        }
+
+        private async Task<IAccount> InitializePublicClientAppAsync()
+        {
+            // Initialize the MSAL library by building a public client application
+            _publicClientApp = PublicClientApplicationBuilder.Create(_winUiSettings.ClientId)
+                .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
+                //if not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
+                .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId))
+                //Using WAM - https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview
+                //.WithBrokerPreview(true)
+                //.WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); })
+                //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
+                .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
+                .Build();
+
+            //Cache configuration and hook-up to public application. Refer to https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/wiki/Cross-platform-Token-Cache#configuring-the-token-cache
+            var storageProperties = new StorageCreationPropertiesBuilder(_winUiSettings.CacheFileName, _winUiSettings.CacheDir).Build();
+            var msalcachehelper = await MsalCacheHelper.CreateAsync(storageProperties);
+            msalcachehelper.RegisterCache(_publicClientApp.UserTokenCache);
+
+            var accounts = await _publicClientApp.GetAccountsAsync();
+            return accounts.FirstOrDefault();
         }
 
         /// <summary>
@@ -100,11 +111,11 @@ namespace WinUIMSALApp
             }
             catch (MsalException msalEx)
             {
-                await DisplayMessageAsync($"Error Acquiring Token:{System.Environment.NewLine}{msalEx}");
+                DisplayMessage($"Error Acquiring Token:{Environment.NewLine}{msalEx}");
             }
             catch (Exception ex)
             {
-                await DisplayMessageAsync($"Error Acquiring Token Silently:{System.Environment.NewLine}{ex}");
+                DisplayMessage($"Error Acquiring Token Silently:{Environment.NewLine}{ex}");
                 return;
             }
         }
@@ -116,12 +127,12 @@ namespace WinUIMSALApp
         /// <returns> Access Token</returns>
         private async Task<string> SignInUserAndGetTokenUsingMSAL(string[] scopes)
         {
-            _currentUserAccount = _currentUserAccount ?? (await _PublicClientApp.GetAccountsAsync()).FirstOrDefault();
+            //_currentUserAccount ??= (await _publicClientApp.GetAccountsAsync()).FirstOrDefault();
 
             try
             {
-                _authResult = await _PublicClientApp.AcquireTokenSilent(scopes, _currentUserAccount)
-                                                  .ExecuteAsync();
+                _authResult = await _publicClientApp.AcquireTokenSilent(scopes, _currentUserAccount)
+                    .ExecuteAsync();
 
                 DispatcherQueue.TryEnqueue(() =>
                 {
@@ -135,7 +146,7 @@ namespace WinUIMSALApp
                 Debug.WriteLine($"MsalUiRequiredException: {ex.Message}");
 
                 // Must be called from UI thread
-                _authResult = await _PublicClientApp.AcquireTokenInteractive(scopes)
+                _authResult = await _publicClientApp.AcquireTokenInteractive(scopes)
                                                   .ExecuteAsync();
             }
 
@@ -162,12 +173,12 @@ namespace WinUIMSALApp
         /// </summary>
         private async void SignOutButton_Click(object sender, RoutedEventArgs e)
         {
-            IEnumerable<IAccount> accounts = await _PublicClientApp.GetAccountsAsync().ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await _publicClientApp.GetAccountsAsync().ConfigureAwait(false);
             IAccount firstAccount = accounts.FirstOrDefault();
 
             try
             {
-                await _PublicClientApp.RemoveAsync(firstAccount).ConfigureAwait(false);
+                await _publicClientApp.RemoveAsync(firstAccount).ConfigureAwait(false);
                 DispatcherQueue.TryEnqueue(() =>
                 {
                     ResultText.Text = "User has signed-out";
@@ -199,9 +210,9 @@ namespace WinUIMSALApp
         /// <summary>
         /// Displays a message in the ResultText. Can be called from any thread.
         /// </summary>
-        private async Task DisplayMessageAsync(string message)
+        private void DisplayMessage(string message)
         {
-            await Task.Run(() => DispatcherQueue.TryEnqueue(() => { ResultText.Text = message; }));
+            DispatcherQueue.TryEnqueue(() => { ResultText.Text = message; });
         }
     }
 }

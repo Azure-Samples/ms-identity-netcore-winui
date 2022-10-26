@@ -1,21 +1,25 @@
 ---
 page_type: sample
-services: ms-identity
-client: ASP.NET Core Web App
-service: ASP.NET Core Web API
-level: 300
-languages:
-- csharp
-products:
-- products here
-platform: Windows
-endpoint: AAD v2.0
-urlFragment: ms-identity-netcore-winui
-name: WinUi desktop application with MSAL
+name: Authenticate users with MSAL.NET in a WinUI desktop application 
 description: This sample demonstrates how to use the [Microsoft Authentication Library (MSAL) for .NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) to get an access token and call the Microsoft Graph using the MS Graph SDK from a Universal Windows Platform (UWP) application.
+- languages:
+    -  csharp
+products:
+    - azure-active-directory
+    - msal-net
+    - Windows
+    - WinUI
+urlFragment: ms-identity-netcore-winui
+extensions:
+- services: ms-identity
+- platform: WinUI
+- endpoint: AAD v2.0
+- level: 100
+- client: WinUI Desktop app
+- service: 
 ---
 
-# WinUi desktop application with MSAL
+# Authenticate users with MSAL.NET in a WinUI desktop application 
 
 [![Build status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/AAD%20Samples/.NET%20client%20samples/ASP.NET%20Core%20Web%20App%20tutorial)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=XXX)
 
@@ -24,24 +28,23 @@ description: This sample demonstrates how to use the [Microsoft Authentication L
 * [Prerequisites](#prerequisites)
 * [Setup the sample](#setup-the-sample)
 * [Explore the sample](#explore-the-sample)
+* [Using Web Account Manager (WAM)](#using-web-account-manager-(wam))
 * [Troubleshooting](#troubleshooting)
 * [About the code](#about-the-code)
 * [How the code was created](#how-the-code-was-created)
-* [Next Steps](#next-steps)
 * [Contributing](#contributing)
 * [Learn more](#learn-more)
 
 ## Overview
 
-This sample demonstrates a ASP.NET Core Web App calling a ASP.NET Core Web API that is secured using Azure AD.
+This sample demonstrates a WinUI Desktop app that authenticates users against Azure AD.
 
 ## Scenario
 
-This sample demonstrates a ASP.NET Core Web App calling a ASP.NET Core Web API that is secured using Azure AD.
+This sample demonstrates a WinUI Desktop app that authenticates users against Azure AD.
 
-1. The client ASP.NET Core Web App uses the [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) to sign-in a user and obtain a JWT [Access Token](https://aka.ms/access-tokens) from **Azure AD**.
-1. The access token is used as a *bearer* token to authorize the user to call the ASP.NET Core Web API protected by **Azure AD**.
-1. The service uses the [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) to protect the Web api, check permissions and validate tokens.
+1. The client WinUI Desktop app uses the [MSAL.NET](http://aka.ms/msal-net) to sign-in a user and obtain a JWT [ID Token](https://aka.ms/id-tokens) from **Azure AD**.
+1. The **ID Token** proves that the user has successfully authenticated against **Azure AD**.
 
 ![Scenario Image](./ReadmeFiles/topology.png)
 
@@ -51,8 +54,6 @@ This sample demonstrates a ASP.NET Core Web App calling a ASP.NET Core Web API t
 * An **Azure AD** tenant. For more information, see: [How to get an Azure AD tenant](https://docs.microsoft.com/azure/active-directory/develop/test-setup-environment#get-a-test-tenant)
 * A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**. If you're signed in to the [Azure portal](https://portal.azure.com) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
 * [Windows App SDK C# VS2022 Templates](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads)
-
-
 
 ## Setup the sample
 
@@ -67,12 +68,6 @@ git clone https://github.com/Azure-Samples/ms-identity-netcore-winui.git
 or download and extract the repository *.zip* file.
 
 > :warning: To avoid path length limitations on Windows, we recommend cloning into a directory near the root of your drive.
-
-### Step 2: Navigate to project folder
-
-```console
-cd WinUIMSALApp
-```
 
 ### Step 3: Register the sample application(s) in your tenant
 
@@ -125,23 +120,26 @@ To manually register the apps, as a first step you'll need to:
 1. In the **Overview** blade, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
 1. In the app's registration screen, select the **Authentication** blade to the left.
 1. If you don't have a platform added, select **Add a platform** and select the **Public client (mobile & desktop)** option.
-    1. In the **Redirect URIs** | **Suggested Redirect URIs for public clients (mobile, desktop)** section, select **ms-appx-web://microsoft.aad.brokerplugin/{ClientId}**
+    1. In the **Redirect URIs** section, add **ms-appx-web://microsoft.aad.brokerplugin/{ClientId}**.
+
+        The **ClientId** is the Id of the App Registration and can be found under **Overview/Application (client) ID**
     1. Click **Save** to save your changes.
-1. In the app's registration screen, select the **Certificates & secrets** blade in the left to open the page where you can generate secrets and upload certificates.
-1. In the **Client secrets** section, select **New client secret**:
-    1. Type a key description (for instance `app secret`).
-    1. Select one of the available key durations (**6 months**, **12 months** or **Custom**) as per your security posture.
-    1. The generated key value will be displayed when you select the **Add** button. Copy and save the generated value for use in later steps.
-    1. You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
-    > :bulb: For enhanced security, instead of using client secrets, consider [using certificates](./README-use-certificate.md) and [Azure KeyVault](https://azure.microsoft.com/services/key-vault/#product-overview).
-    
+1. Since this app signs-in users, we will now proceed to select **delegated permissions**, which is is required by apps signing-in users.
+    1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs:
+    1. Select the **Add a permission** button and then:
+    1. Ensure that the **Microsoft APIs** tab is selected.
+    1. In the *Commonly used Microsoft APIs* section, select **Microsoft Graph**
+      * Since this app signs-in users, we will now proceed to select **delegated permissions**, which is requested by apps that signs-in users.
+      * In the **Delegated permissions** section, select **User.Read** in the list. Use the search box if necessary.
+    1. Select the **Add permissions** button at the bottom.
+
 ##### Configure Optional Claims
 
 1. Still on the same app registration, select the **Token configuration** blade to the left.
 1. Select **Add optional claim**:
     1. Select **optional claim type**, then choose **ID**.
-    1. Select the optional claim **acct**. 
-    > Provides user's account status in tenant. If the user is a **member** of the tenant, the value is 0. If they're a **guest**, the value is 1.
+    1. Select the optional claim **acct**.
+    > Provides user's account status in tenant. If the user is a **member** of the tenant, the value is *0*. If they're a **guest**, the value is *1*.
     1. Select **Add** to save your changes.
 
 ##### Configure the client app (WinUI-App-Calling-MsGraph) to use your app registration
@@ -153,23 +151,14 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 1. Open the `WinUIMSALApp\appsettings.json` file.
 1. Find the key `TenantId` and replace the existing value with your Azure AD tenant/directory ID.
 1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of `WinUI-App-Calling-MsGraph` app copied from the Azure portal.
-### Variation: web app using client certificates
-
-Follow [README-use-certificate.md](README-use-certificate.md) to know how to use this option.
 
 ### Step 4: Running the sample
 
-From your shell or command line, execute the following commands:
-
-```console
-    cd WinUIMSALApp
-    dotnet run
-```
+    Open the solution in Visual Studio and start it by pressing F5 to debug or Ctrl+F5 without debug.
 
 ## Explore the sample
 
 <details>
-
  <summary>Expand the section</summary>
 
   Start running the sample by pressing `WinUIMSALApp (Package)` button on Visual Studio menu bar.
@@ -192,19 +181,57 @@ From your shell or command line, execute the following commands:
 
   **So make sure to sign-out every time before closing the UI.**
 
-  [LINK FOR SURVEY HERE]
+  [Azure AD code sample survey - A .NET Core WinUI application that signs-in users and calls Microsoft Graph](https://forms.microsoft.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUN0Q5NkFVUFBDVTZTNkhSUkEzUk9aM0szQiQlQCN0PWcu)
+
+## Using Web Account Manager (WAM)
+
+MSAL is able to call [Web Account Manager](https://learn.microsoft.com/windows/uwp/security/web-account-manager), a Windows 10 component that ships with the OS. This component acts as an authentication broker and users of your app benefit from integration with accounts known from Windows, such as the account you signed-in with in your Windows session.
+
+### WAM value proposition
+
+Using an authentication broker such as WAM has numerous benefits.
+
+* Enhanced security (your app doesn't have to manage the powerful refresh token)
+* Better support for Windows Hello, Conditional Access and FIDO keys
+* Integration with Windows' "Email and Accounts" view
+* Better Single Sign-On (users don't have to reenter passwords)
+* Most bug fixes and enhancements will be shipped with Windows
+
+### WAM limitations
+
+* B2C and ADFS authorities aren't supported. MSAL will fall back to a browser.
+* Available on Win10+ and Win Server 2019+. On Mac, Linux, and earlier versions of Windows, MSAL will fall back to a browser.
+* Not available on Xbox.
 
 </details>
-
 
 ## Troubleshooting
 
 <details>
-	<summary>Expand for troubleshooting info</summary>
+ <summary>Expand for troubleshooting info</summary>
+ 
+### "Either the user canceled the authentication or the WAM Account Picker crashed because the app is running in an elevated process" error message
 
-ASP.NET core applications create session cookies that represent the identity of the caller. Some Safari users using iOS 12 had issues which are described in ASP.NET Core #4467 and the Web kit bugs database Bug 188165 - iOS 12 Safari breaks ASP.NET Core 2.1 OIDC authentication.
+When an app that uses MSAL is run as an elevated process, some of these calls within WAM may fail due to different process security levels. Internally MSAL.NET uses native Windows methods ([COM](/windows/win32/com/the-component-object-model)) to integrate with WAM. Starting with version 4.32.0, MSAL will display a descriptive error message when it detects that the app process is elevated and WAM returned no accounts.
 
-If your web site needs to be accessed from users using iOS 12, you probably want to disable the SameSite protection, but also ensure that state changes are protected with CSRF anti-forgery mechanism. See the how to fix section of Microsoft Security Advisory: iOS12 breaks social, WSFed and OIDC logins #4647
+One solution is to not run the app as elevated, if possible. Another solution is for the app developer to call `WindowsNativeUtils.InitializeProcessSecurity` method when the app starts up. This will set the security of the processes used by WAM to the same levels. See [this sample app](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/tests/devapps/WAM/NetCoreWinFormsWam/Program.cs#L18-L21) for an example. However, note, that this solution isn't guaranteed to succeed to due external factors like the underlying CLR behavior. In that case, an `MsalClientException` will be thrown. For more information, see issue [#2560](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2560).
+
+### "WAM Account Picker did not return an account" error message
+
+This message indicates that either the application user closed the dialog that displays accounts, or the dialog itself crashed. A crash might occur if AccountsControl, a Windows control, is registered incorrectly in Windows. To resolve this issue:
+
+1. In the taskbar, right-click **Start**, and then select **Windows PowerShell (Admin)**.
+1. If you're prompted by a User Account Control (UAC) dialog, select **Yes** to start PowerShell.
+1. Copy and then run the following script:
+
+   ```powershell
+   if (-not (Get-AppxPackage Microsoft.AccountsControl)) { Add-AppxPackage -Register "$env:windir\SystemApps\Microsoft.AccountsControl_cw5n1h2txyewy\AppxManifest.xml" -DisableDevelopmentMode -ForceApplicationShutdown } Get-AppxPackage Microsoft.AccountsControl
+
+> * Use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) to get support from the community.
+Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
+Make sure that your questions or comments are tagged with [`azure-active-directory` `winui` `ms-identity` `adal` `msal`].
+
+If you find a bug in the sample, raise the issue on [GitHub Issues](../../../../issues).
 </details>
 
 ## About the code
@@ -213,7 +240,7 @@ If your web site needs to be accessed from users using iOS 12, you probably want
  <summary>Expand the section</summary>
 For general information about how the project is organized, refer to the [tutorial](https://learn.microsoft.com/windows/apps/winui/winui3/create-your-first-winui3-app)
 
-The constuctor of `MainWindow` class was modified by adding a configuration, MSAL Authentication and token caching capability:
+The constructor of `MainWindow` class was modified by adding a configuration, MSAL Authentication and token caching capability:
 
 ```csharp
    
@@ -223,8 +250,7 @@ The constuctor of `MainWindow` class was modified by adding a configuration, MSA
     
     _PublicClientApp = PublicClientApplicationBuilder.Create(_winUiSettings.ClientId)
         .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
-        .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId))
- 
+        .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId)) 
         .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) 
         .Build();
 
@@ -267,9 +293,36 @@ To understand more how the buttons are linked to the callback functions, open `M
 
 ```
 
+### Using the Broker (WAM)
+
+MSAL is also able to call [Web Account Manager](https://learn.microsoft.com/windows/uwp/security/web-account-manager), a Windows 10 component that ships with the OS. This component acts as an authentication broker and users of your app benefit from integration with accounts known from Windows, such as the account you signed-in with in your Windows session.
+
+The constructor of `MainWindow` class can be modified further to utilize WAM for authentication by making the following changes to the code:
+
+```csharp
+   
+    _publicClientApp = PublicClientApplicationBuilder.Create(_winUiSettings.ClientId)
+        .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
+        //if not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
+        .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId))
+
+        //Using WAM - https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview
+        .WithBrokerPreview(true)
+        .WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); })
+        
+        //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
+        .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
+        .Build();
+```
+
+Refer to [MSAL WAM](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview) for more details on how to write code for this.
 </details>
 
 ## How the code was created
+
+<details>
+
+<summary>Expand the section</summary>
 
  The current sample is based on [UWP sample](https://github.com/Azure-Samples/active-directory-dotnet-native-uwp-v2) in terms of UI and logical structure - it is similar for both.
 
@@ -277,15 +330,87 @@ To understand more how the buttons are linked to the callback functions, open `M
 
  It might be helpful to read [Initial project creation instructions](https://learn.microsoft.com/windows/apps/winui/winui3/create-your-first-winui3-app) as well.
 
- 
+### Adding configuration
 
-## Next Steps
+To be able to use `appsettings.json` file similar to ASP.NET applications, install `Microsoft.Extensions.Configuration.Binder` and `Microsoft.Extensions.Configuration.Json`.
+Create new file inside your client project - `appsettings.json`, with the following contents
 
-Learn how to:
+```json
+ {
+  "AzureAAD": {
+    "ClientId": "[Enter the Client Id (Application ID obtained from the Azure portal), e.g. ba74781c2-53c2-442a-97c2-3d60re42f403]",
+    "TenantId": "[Enter 'common', or 'organizations' or the Tenant Id (Obtained from the Azure portal. Select 'Endpoints' from the 'App registrations' blade and use the GUID in any of the URLs), e.g. da41245a5-11b3-996c-00a8-4d99re19f292]",
+    "Authority": "https://login.microsoftonline.com/{0}",
+    "MSGraphURL": "https://graph.microsoft.com/v1.0",
+    "RedirectURL": "ms-appx-web://microsoft.aad.brokerplugin/{0}",
+    "CacheFileName": "netcore_winui_cache.txt",
+    "CacheDir": "C:/Temp",
+    "Scopes": "user.read" //write multiple scopes separated by space, Ex: scope1 scope2 ...
+  }
+ }
+```
 
-* [Change your app to sign-in users from any organization or Microsoft accounts](https://github.com/Azure-Samples/active-directory-aspnetcore-webapp-openidconnect-v2/tree/master/1-WebApp-OIDC/1-3-AnyOrgOrPersonal)
-* [Enable users from National clouds to sign-in to your application](https://github.com/Azure-Samples/active-directory-aspnetcore-webapp-openidconnect-v2/tree/master/1-WebApp-OIDC/1-4-Sovereign)
-* [Enable your web app to call a web API on behalf of the signed-in user](https://github.com/Azure-Samples/ms-identity-dotnetcore-ca-auth-context-app)
+The file will configure Authentication and Caching for the application. `ClientId` and `TenantId` keys will be updated either by you during manual App Registration setup or by `AppCreationScripts\Configure.ps1` if you choose automated setup.
+
+After creating the configuration file add the below lines after call to `InitializeComponent();` inside `MainWindow.xaml.cs` file, `MainWindow()` method:
+
+```csharp
+ var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+ _winUiSettings = configuration.GetSection("AzureAAD").Get<WinUISettings>();
+```
+
+### Adding MSAL support and logging
+
+[MSAL.NET for public clients](https://learn.microsoft.com/azure/active-directory/develop/msal-net-initializing-client-applications) is used to Authenticate with Azure AD to gain access token to MSGraph API. 
+Install `Microsoft.Identity.Client.Extensions.Msal` package and create a Public Client application by adding the below code immediately after configuration lines:
+
+```csharp
+ _PublicClientApp = PublicClientApplicationBuilder.Create(_winUiSettings.ClientId)
+  .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
+  .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId))
+  .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) 
+  .Build();
+```
+
+Notice the `.WithLogging()` method is being called. You will have to implement `IIdentityLogger` interface in similar to how it was [implemented](https://github.com/Azure-Samples/ms-identity-netcore-winui/blob/main/WinUIMSALApp/Logging/IdentityLogger.cs) inside the current sample.
+
+Refer to the [sample source code](https://github.com/Azure-Samples/ms-identity-netcore-winui/blob/f98f3170b3759e812fdd320cead851e2c73e15d5/WinUIMSALApp/MainWindow.xaml.cs#L56) for more information about the lines you've just added.
+
+### Adding Token Cache
+
+[Token Cache](https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/wiki/Cross-platform-Token-Cache#configuring-the-token-cache) issued to enhance user experience by skipping authentication part if the user is logging-in within Access Token expiry period. Add the below code immediately after Public Client creation code:
+
+```csharp
+var storageProperties = new StorageCreationPropertiesBuilder(_winUiSettings.CacheFileName, _winUiSettings.CacheDir).Build();
+Task.Run(async () => await MsalCacheHelper.CreateAsync(storageProperties)).Result.RegisterCache(_PublicClientApp.UserTokenCache);
+```
+
+At the end of [MainWindow()](https://github.com/Azure-Samples/ms-identity-netcore-winui/blob/f98f3170b3759e812fdd320cead851e2c73e15d5/WinUIMSALApp/MainWindow.xaml.cs#L47) method the application tries to obtain current user account and set Sign-in button text accordingly.
+
+### User sign-In process
+
+Before calling MSGraph API, user should authenticate. The process is started by calling `SignInAndInitializeGraphServiceClient()` method that will attempt to authenticate and create MSGraph client object. There are 2 ways to obtain the token:
+
+- `AcquireTokenSilent()` - where the application tries to obtain the access token from token cache
+- `AcquireTokenInteractive()` - in case of `AcquireTokenSilent()` failed with [MsalUiRequiredException](https://learn.microsoft.com/dotnet/api/microsoft.identity.client.msaluirequiredexception?view=azure-dotnet). In this case user will be offered to type their credentials into a standard authentication UI dialog box.
+
+### Calling MSGraph API
+
+To be able to call for the [MSGraph API](https://learn.microsoft.com/graph/use-the-api), the `Microsoft.Graph` package must be installed. Then the below code inside `CallGraphButton_Click()` method is called:
+
+```csharp
+ GraphServiceClient graphClient = await SignInAndInitializeGraphServiceClient(_winUiSettings.Scopes.Split(' '));
+ User graphUser = await graphClient.Me.Request().GetAsync();
+```
+
+### Additional code
+
+Take a look into [MainWindow.xaml.cs](https://github.com/Azure-Samples/ms-identity-netcore-winui/blob/main/WinUIMSALApp/MainWindow.xaml.cs) and learn how Sign-in/Sign-out buttons callback functions are being used to call MSGraph API and manage user authentication state.
+
+</details>
+
+
+
 
 ## Contributing
 
@@ -295,10 +420,22 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Learn more
 
- [WinUi open source project](https://github.com/microsoft/microsoft-ui-xaml)
-
- [ILogging interface](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging)
-
- 
-
-
+* [WinUi open source project](https://github.com/microsoft/microsoft-ui-xaml)
+* [ILogging interface](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging)
+* [MSGraph API](https://learn.microsoft.com/graph/use-the-api)
+* [Microsoft identity platform (Azure Active Directory for developers)](https://docs.microsoft.com/azure/active-directory/develop/)
+* [Azure AD code samples](https://docs.microsoft.com/azure/active-directory/develop/sample-v2-code)
+* [Overview of Microsoft Authentication Library (MSAL)](https://docs.microsoft.com/azure/active-directory/develop/msal-overview)
+* [Register an application with the Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app)
+  
+* To learn more about the code, visit:
+  * [Conceptual documentation for MSAL.NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#conceptual-documentation) and in particular:
+  * [Acquiring tokens with authorization codes on web apps](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Acquiring-tokens-with-authorization-codes-on-web-apps)
+  * [Customizing Token cache serialization](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization)
+  
+  * [Quickstart: Register an application with the Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app)
+  *  [Understanding Azure AD application consent experiences](https://docs.microsoft.com/azure/active-directory/develop/application-consent-experience)
+  * [Understand user and admin consent](https://docs.microsoft.com/azure/active-directory/develop/howto-convert-app-to-be-multi-tenant#understand-user-and-admin-consent)
+  * [Application and service principal objects in Azure Active Directory](https://docs.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals)
+  * [Authentication Scenarios for Azure AD](https://docs.microsoft.com/azure/active-directory/develop/authentication-flows-app-scenarios)
+  * [Building Zero Trust ready apps](https://aka.ms/ztdevsession)
