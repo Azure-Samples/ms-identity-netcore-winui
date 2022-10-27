@@ -2,13 +2,13 @@
 page_type: sample
 name: Authenticate users with MSAL.NET in a WinUI desktop application 
 description: This sample demonstrates how to use the [Microsoft Authentication Library (MSAL) for .NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) to get an access token and call the Microsoft Graph using the MS Graph SDK from a Universal Windows Platform (UWP) application.
-- languages:
-    -  csharp
+languages:
+ - csharp
 products:
-    - azure-active-directory
-    - msal-net
-    - Windows
-    - WinUI
+ - azure-active-directory
+ - msal-net
+ - Windows
+ - WinUI
 urlFragment: ms-identity-netcore-winui
 extensions:
 - services: ms-identity
