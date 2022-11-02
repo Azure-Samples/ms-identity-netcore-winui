@@ -74,6 +74,7 @@ namespace WinUIMSALApp
                 //.WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); })
                 //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
                 .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
+                .WithClientCapabilities(new string[] { "cp1" }) //client capabilities for CAE - https://learn.microsoft.com/azure/active-directory/develop/app-resilience-continuous-access-evaluation?tabs=dotnet
                 .Build();
 
             //Cache configuration and hook-up to public application. Refer to https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/wiki/Cross-platform-Token-Cache#configuring-the-token-cache
@@ -90,33 +91,58 @@ namespace WinUIMSALApp
         /// </summary>
         private async void CallGraphButton_Click(object sender, RoutedEventArgs e)
         {
+            GraphServiceClient graphClient = null;
+            var scopes = _winUiSettings.Scopes.Split(' ');
+
             try
             {
                 // Sign-in user using MSAL and obtain an access token for MS Graph
-                GraphServiceClient graphClient = await SignInAndInitializeGraphServiceClient(_winUiSettings.Scopes.Split(' '));
-
+                graphClient = await SignInAndInitializeGraphServiceClient(scopes);
                 // Call the /me endpoint of Graph
                 User graphUser = await graphClient.Me.Request().GetAsync();
 
-                // Go back to the UI thread to make changes to the UI
-                DispatcherQueue.TryEnqueue(() =>
-                {
-                    ResultText.Text = "Display Name: " + graphUser.DisplayName + "\nBusiness Phone: " + graphUser.BusinessPhones.FirstOrDefault()
-                                      + "\nGiven Name: " + graphUser.GivenName + "\nid: " + graphUser.Id
-                                      + "\nUser Principal Name: " + graphUser.UserPrincipalName;
-                    DisplayBasicTokenInfo(_authResult);
-                    this.SignOutButton.Visibility = Visibility.Visible;
-                    this.CallGraphButton.Content = _buttonTextAuthorized;
-                });
             }
             catch (MsalException msalEx)
             {
                 DisplayMessage($"Error Acquiring Token:{Environment.NewLine}{msalEx}");
             }
-            catch (Exception ex)
+            catch (ServiceException ex) when (ex.Message.Contains("Continuous access evaluation resulted in claims challenge"))
             {
-                DisplayMessage($"Error Acquiring Token Silently:{Environment.NewLine}{ex}");
-                return;
+                //**************************************************************
+                //We come here when CAE kicks-off and Graph API throws exception
+                //**************************************************************
+
+                //get challenge from response of Graph API
+                var claimChallenge = WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(ex.ResponseHeaders);
+
+                //use the challenge to obtain fresh token
+                _authResult = await _publicClientApp.AcquireTokenInteractive(scopes).WithClaims(claimChallenge).ExecuteAsync();
+
+                // Sign-in user using MSAL and fresh token for MS Graph
+                graphClient = await SignInAndInitializeGraphServiceClient(scopes, _authResult.AccessToken);
+            }
+            finally
+            {
+                if (graphClient == null)
+                {
+                    DisplayMessage($"Error Acquiring Token Silently");
+                }
+                else
+                {
+                    // Call the /me endpoint of Graph
+                    User graphUser = await graphClient.Me.Request().GetAsync();
+
+                    // Go back to the UI thread to make changes to the UI
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        ResultText.Text = "Display Name: " + graphUser.DisplayName + "\nBusiness Phone: " + graphUser.BusinessPhones.FirstOrDefault()
+                                          + "\nGiven Name: " + graphUser.GivenName + "\nid: " + graphUser.Id
+                                          + "\nUser Principal Name: " + graphUser.UserPrincipalName;
+                        DisplayBasicTokenInfo(_authResult);
+                        this.SignOutButton.Visibility = Visibility.Visible;
+                        this.CallGraphButton.Content = _buttonTextAuthorized;
+                    });
+                }
             }
         }
 
@@ -127,7 +153,7 @@ namespace WinUIMSALApp
         /// <returns> Access Token</returns>
         private async Task<string> SignInUserAndGetTokenUsingMSAL(string[] scopes)
         {
-            //_currentUserAccount ??= (await _publicClientApp.GetAccountsAsync()).FirstOrDefault();
+            _currentUserAccount ??= (await _publicClientApp.GetAccountsAsync()).FirstOrDefault();
 
             try
             {
@@ -146,8 +172,7 @@ namespace WinUIMSALApp
                 Debug.WriteLine($"MsalUiRequiredException: {ex.Message}");
 
                 // Must be called from UI thread
-                _authResult = await _publicClientApp.AcquireTokenInteractive(scopes)
-                                                  .ExecuteAsync();
+                _authResult = await _publicClientApp.AcquireTokenInteractive(scopes).ExecuteAsync();
             }
 
             return _authResult.AccessToken;
@@ -157,13 +182,14 @@ namespace WinUIMSALApp
         /// Sign in user using MSAL and obtain a token for MS Graph
         /// </summary>
         /// <returns>GraphServiceClient</returns>
-        private async Task<GraphServiceClient> SignInAndInitializeGraphServiceClient(string[] scopes)
+        private async Task<GraphServiceClient> SignInAndInitializeGraphServiceClient(string[] scopes, string token = null)
         {
             GraphServiceClient graphClient = new GraphServiceClient(_winUiSettings.MsGraphURL,
-                new DelegateAuthenticationProvider(async (requestMessage) =>
-                {
-                    requestMessage.Headers.Authorization = new AuthenticationHeaderValue("bearer", await SignInUserAndGetTokenUsingMSAL(scopes));
-                }));
+                            new DelegateAuthenticationProvider(async (requestMessage) =>
+                            {
+                                //don't try to sign-in if toekn was supplied as an input parameter
+                                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("bearer", token ?? await SignInUserAndGetTokenUsingMSAL(scopes));
+                            }));
 
             return await Task.FromResult(graphClient);
         }

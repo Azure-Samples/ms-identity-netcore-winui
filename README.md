@@ -2,13 +2,13 @@
 page_type: sample
 name: Authenticate users with MSAL.NET in a WinUI desktop application 
 description: This sample demonstrates how to use the [Microsoft Authentication Library (MSAL) for .NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) to get an access token and call the Microsoft Graph using the MS Graph SDK from a Universal Windows Platform (UWP) application.
-languages:
- - csharp
+- languages:
+    -  csharp
 products:
- - azure-active-directory
- - msal-net
- - Windows
- - WinUI
+    - azure-active-directory
+    - msal-net
+    - Windows
+    - WinUI
 urlFragment: ms-identity-netcore-winui
 extensions:
 - services: ms-identity
@@ -55,6 +55,8 @@ This sample demonstrates a WinUI Desktop app that authenticates users against Az
 * A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**. If you're signed in to the [Azure portal](https://portal.azure.com) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
 * [Windows App SDK C# VS2022 Templates](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads)
 
+
+
 ## Setup the sample
 
 ### Step 1: Clone or download this repository
@@ -68,6 +70,7 @@ git clone https://github.com/Azure-Samples/ms-identity-netcore-winui.git
 or download and extract the repository *.zip* file.
 
 > :warning: To avoid path length limitations on Windows, we recommend cloning into a directory near the root of your drive.
+
 
 ### Step 3: Register the sample application(s) in your tenant
 
@@ -123,7 +126,8 @@ To manually register the apps, as a first step you'll need to:
     1. In the **Redirect URIs** section, add **ms-appx-web://microsoft.aad.brokerplugin/{ClientId}**.
 
         The **ClientId** is the Id of the App Registration and can be found under **Overview/Application (client) ID**
-    1. Click **Save** to save your changes.
+
+  1. Click **Save** to save your changes.
 1. Since this app signs-in users, we will now proceed to select **delegated permissions**, which is is required by apps signing-in users.
     1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs:
     1. Select the **Add a permission** button and then:
@@ -252,6 +256,7 @@ The constructor of `MainWindow` class was modified by adding a configuration, MS
         .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
         .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId)) 
         .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) 
+        .WithClientCapabilities(new string[] { "cp1" })
         .Build();
 
     var storageProperties = new StorageCreationPropertiesBuilder(_winUiSettings.CacheFileName, _winUiSettings.CacheDir).Build();
@@ -312,10 +317,42 @@ The constructor of `MainWindow` class can be modified further to utilize WAM for
         
         //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
         .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
+        .WithClientCapabilities(new string[] { "cp1" }) //client capabilities for CAE - https://learn.microsoft.com/azure/active-directory/develop/app-resilience-continuous-access-evaluation?tabs=dotnet
         .Build();
 ```
 
 Refer to [MSAL WAM](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview) for more details on how to write code for this.
+
+### Process the CAE challenge from Microsoft Graph
+
+To process the CAE challenge from Microsoft Graph, the controller actions need to extract it from the `wwwAuthenticate` header. It is returned when MS Graph rejects a seemingly valid Access tokens for MS Graph. For this you need to:
+
+1. To use `.WithClientCapabilities` method when creating Public Client app
+
+   ```csharp
+    .WithClientCapabilities(new string[] { "cp1" }) //client capabilities for CAE - https://learn.microsoft.com/azure/active-directory/develop/app-resilience-continuous-access-evaluation?tabs=dotnet
+   ```
+
+2. Catch `ServiceException` thrown by Graph API, try to obtain new token interactively, create Graph API client with the new token:
+
+   ```csharp
+     catch (ServiceException ex) when (ex.Message.Contains("Continuous access evaluation resulted in claims challenge"))
+        {
+            //**************************************************************
+            //We come here when CAE kicks-off and Graph API throws exception
+            //**************************************************************
+
+            //get challenge from response of Graph API
+            var claimChallenge = WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(ex.ResponseHeaders);
+
+            //use the challenge to obtain fresh token
+            _authResult = await _publicClientApp.AcquireTokenInteractive(scopes).WithClaims(claimChallenge).ExecuteAsync();
+
+            // Sign-in user using MSAL and fresh token for MS Graph
+            graphClient = await SignInAndInitializeGraphServiceClient(scopes, _authResult.AccessToken);
+        }
+   ```
+
 </details>
 
 ## How the code was created
