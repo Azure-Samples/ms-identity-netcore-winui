@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinUIMSALApp", "WinUIMSALAp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppCreationScripts", "AppCreationScripts", "{B4E33940-43A8-471B-B279-9CB8F3A415A1}"
 	ProjectSection(SolutionItems) = preProject
+		AppCreationScripts\Cleanup.ps1 = AppCreationScripts\Cleanup.ps1
+		AppCreationScripts\Configure.ps1 = AppCreationScripts\Configure.ps1
 		AppCreationScripts\sample.json = AppCreationScripts\sample.json
 	EndProjectSection
 EndProject

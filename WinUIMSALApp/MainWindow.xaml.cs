@@ -67,17 +67,18 @@ namespace WinUIMSALApp
             // Initialize the MSAL library by building a public client application
             _publicClientApp = PublicClientApplicationBuilder.Create(_winUiSettings.ClientId)
                 .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
-                //if not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
+                // If not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
                 .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId))
-                //Using WAM - https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview
-                //.WithBrokerPreview(true)
-                //.WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); })
-                //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
-                .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
-                .WithClientCapabilities(new string[] { "cp1" }) //client capabilities for CAE - https://learn.microsoft.com/azure/active-directory/develop/app-resilience-continuous-access-evaluation?tabs=dotnet
+                // Using WAM - https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview
+                // .WithBrokerPreview(true)
+                // .WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); })
+                // This is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
+                .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) // Set Identity Logging level to Warning which is a middle ground
+                // Specify Window handle - required
+                .WithClientCapabilities(new string[] { "cp1" }) // Client capabilities for CAE - https://learn.microsoft.com/azure/active-directory/develop/app-resilience-continuous-access-evaluation?tabs=dotnet
                 .Build();
 
-            //Cache configuration and hook-up to public application. Refer to https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/wiki/Cross-platform-Token-Cache#configuring-the-token-cache
+            // Cache configuration and hook-up to public application. Refer to https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/wiki/Cross-platform-Token-Cache#configuring-the-token-cache
             var storageProperties = new StorageCreationPropertiesBuilder(_winUiSettings.CacheFileName, _winUiSettings.CacheDir).Build();
             var msalcachehelper = await MsalCacheHelper.CreateAsync(storageProperties);
             msalcachehelper.RegisterCache(_publicClientApp.UserTokenCache);
@@ -109,14 +110,14 @@ namespace WinUIMSALApp
             catch (ServiceException ex) when (ex.Message.Contains("Continuous access evaluation resulted in claims challenge"))
             {
                 //**************************************************************
-                //We come here when CAE kicks-off and Graph API throws exception
+                // Handle a claims challenge produced by CAE by requesting a new access token with more claims
                 //**************************************************************
 
-                //get challenge from response of Graph API
+                // Get challenge from response of Graph API
                 var claimChallenge = WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(ex.ResponseHeaders);
 
-                //use the challenge to obtain fresh token
-                _authResult = await _publicClientApp.AcquireTokenInteractive(scopes).WithClaims(claimChallenge).ExecuteAsync();
+                // Use the challenge to obtain fresh token
+                _authResult = await _publicClientApp.AcquireTokenInteractive(scopes).WithAccount(_currentUserAccount).WithClaims(claimChallenge).ExecuteAsync();
 
                 // Sign-in user using MSAL and fresh token for MS Graph
                 graphClient = await SignInAndInitializeGraphServiceClient(scopes, _authResult.AccessToken);
@@ -187,7 +188,7 @@ namespace WinUIMSALApp
             GraphServiceClient graphClient = new GraphServiceClient(_winUiSettings.MsGraphURL,
                             new DelegateAuthenticationProvider(async (requestMessage) =>
                             {
-                                //don't try to sign-in if toekn was supplied as an input parameter
+                                // Don't try to sign-in if toekn was supplied as an input parameter
                                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("bearer", token ?? await SignInUserAndGetTokenUsingMSAL(scopes));
                             }));
 

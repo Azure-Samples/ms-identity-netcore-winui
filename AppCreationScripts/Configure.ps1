@@ -185,7 +185,7 @@ Function ConfigureApplications
     $currentAppId = $clientAadApplication.AppId
     $currentAppObjectId = $clientAadApplication.Id
 
-    $replyUrlsForApp = "ms-appx-web://microsoft.aad.brokerplugin/" + $currentAppId + ""
+    $replyUrlsForApp = "ms-appx-web://microsoft.aad.brokerplugin/" + $currentAppId
     Update-MgApplication -ApplicationId $currentAppObjectId -PublicClient @{RedirectUris=$replyUrlsForApp}
     $tenantName = (Get-MgApplication -ApplicationId $currentAppObjectId).PublisherDomain
     #Update-MgApplication -ApplicationId $currentAppObjectId -IdentifierUris @("https://$tenantName/WinUI-App-Calling-MSGraph")
