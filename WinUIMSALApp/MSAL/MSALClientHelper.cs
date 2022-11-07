@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace WinUIMSALApp.MSAL
 {
@@ -80,9 +81,9 @@ namespace WinUIMSALApp.MSAL
             // Initialize the MSAL library by building a public client application
             this.PublicClientApplication = PublicClientApplicationBuilder.Create(AzureADConfig.ClientId)
                 .WithAuthority(string.Format(AzureADConfig.Authority, AzureADConfig.TenantId))
-                .WithRedirectUri(string.Format(AzureADConfig.RedirectURL, AzureADConfig.ClientId))          // Skipping this will make MSAL fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
-                .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false)                // This is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging. Set Identity Logging level to Warning which is a middle ground
-                .WithClientCapabilities(new string[] { "cp1" })                                                 // declare the client capable for CAE - https://aka.ms/clientcae
+                .WithRedirectUri(string.Format(AzureADConfig.RedirectURL, AzureADConfig.ClientId))  // Skipping this will make MSAL fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
+                .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false)    // This is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging. Set Identity Logging level to Warning which is a middle ground
+                .WithClientCapabilities(new string[] { "cp1" })                                     // declare this client app capable of receiving CAE events- https://aka.ms/clientcae
                 .Build();
 
             IEnumerable<IAccount> accounts = await AttachTokenCache();
@@ -102,9 +103,9 @@ namespace WinUIMSALApp.MSAL
                 .WithAuthority(string.Format(AzureADConfig.Authority, AzureADConfig.TenantId))
                 .WithRedirectUri(string.Format(AzureADConfig.RedirectURL, AzureADConfig.ClientId))              // Skipping this will make MSAL fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
                 .WithBrokerPreview(true)
-                .WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); })    // Specify Window handle - (required for WAM).
-                .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false)                    // This is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging. Set Identity Logging level to Warning which is a middle ground
-                .WithClientCapabilities(new string[] { "cp1" })                                                    // declare the client capable for CAE - https://aka.ms/clientcae
+                .WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); }) // Specify Window handle - (required for WAM).
+                .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false)                // This is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging. Set Identity Logging level to Warning which is a middle ground
+                .WithClientCapabilities(new string[] { "cp1" })                                                 // declare this client app capable of receiving CAE events- https://aka.ms/clientcae
                 .Build();
 
             this.IsBrokerInitialized = true;
@@ -177,7 +178,7 @@ namespace WinUIMSALApp.MSAL
         /// Signs the in user and acquire access token for a provided set of scopes.
         /// </summary>
         /// <param name="scopes">The scopes.</param>
-        /// <param name="extraclaims">The extraclaims, usually from CAE. We basically handle CAE by sending the user back to Azure AD for additional processing and requesting a new access token for Graph</param>
+        /// <param name="extraclaims">The extra claims, usually from CAE. We basically handle CAE by sending the user back to Azure AD for additional processing and requesting a new access token for Graph</param>
         /// <returns></returns>
 
         public async Task<String> SignInUserAndAcquireAccessToken(string[] scopes, string extraclaims)
@@ -198,7 +199,7 @@ namespace WinUIMSALApp.MSAL
             return this.AuthResult.AccessToken;
         }
 
-        private async Task<AuthenticationResult> LoginSilentAndInteractiveAsync()
+        private async Task<AuthenticationResult> LoginSilentAndInteractiveAsync(string[] scopes)
         {
             var existingAccount = await FetchAnExistingAccountFromCache().ConfigureAwait(false);
 
@@ -209,7 +210,7 @@ namespace WinUIMSALApp.MSAL
                 {
                     Console.WriteLine("Found account in the cache - trying to use it");
 
-                    return await this.PublicClientApplication.AcquireTokenSilent(this.AzureADConfig.ScopesArray, existingAccount)
+                    return await this.PublicClientApplication.AcquireTokenSilent(scopes, existingAccount)
                             .ExecuteAsync();
                 }
                 // 2. If it does not exist, try to sign in with the OS account. Only Windows broker supports this
@@ -220,7 +221,7 @@ namespace WinUIMSALApp.MSAL
                         Console.WriteLine("No accounts found in the cache. Trying Window's default account.");
 
                         return await this.PublicClientApplication.AcquireTokenSilent(
-                            this.AzureADConfig.ScopesArray,
+                            scopes,
                             Microsoft.Identity.Client.PublicClientApplication.OperatingSystemAccount)
                                 .ExecuteAsync();
                     }
@@ -232,15 +233,15 @@ namespace WinUIMSALApp.MSAL
             }
 
             // 3. If all else fails, use interactive auth
-            return await LoginInteractiveAsync(existingAccount).ConfigureAwait(false);
+            return await LoginInteractiveAsync(scopes, existingAccount).ConfigureAwait(false);
         }
 
-        private async Task<AuthenticationResult> LoginInteractiveAsync(IAccount existingAccount = null)
+        private async Task<AuthenticationResult> LoginInteractiveAsync(string[] scopes, IAccount existingAccount = null)
         {
             // If the operating system has UI
             if (this.PublicClientApplication.IsUserInteractive())
             {
-                return await this.PublicClientApplication.AcquireTokenInteractive(this.AzureADConfig.ScopesArray)
+                return await this.PublicClientApplication.AcquireTokenInteractive(scopes)
                     .WithLoginHint(existingAccount?.Username ?? String.Empty)
                     // .WithParentActivityOrWindow(WindowsHelper.GetConsoleOrTerminalWindow()) // TODO: fix it
                     .ExecuteAsync()
@@ -249,7 +250,7 @@ namespace WinUIMSALApp.MSAL
 
             // If the operating system does not have UI (e.g. SSH into Linux), you can fallback to device code, however this
             // flow will not satisfy the "device is managed" CA policy.
-            return await this.PublicClientApplication.AcquireTokenWithDeviceCode(this.AzureADConfig.ScopesArray, (dcr) =>
+            return await this.PublicClientApplication.AcquireTokenWithDeviceCode(scopes, (dcr) =>
             {
                 Console.WriteLine(dcr.Message);
                 return Task.CompletedTask;
