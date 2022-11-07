@@ -100,7 +100,7 @@ namespace WinUIMSALApp.MSAL
         /// <summary>
         /// Attaches the token cache to the Public Client app.
         /// </summary>
-        /// <returns>An IAccount instance of an already signed-in user (if available)</returns>
+        /// <returns>IAccount list of already signed-in users (if available)</returns>
         public async Task<IEnumerable<IAccount>> AttachTokenCache()
         {
             // Cache configuration and hook-up to public application. Refer to https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/wiki/Cross-platform-Token-Cache#configuring-the-token-cache
@@ -124,7 +124,7 @@ namespace WinUIMSALApp.MSAL
             try
             {
                 this.AuthResult = await this.PublicClientApplication.AcquireTokenSilent(scopes, existingUser)
-                    .ExecuteAsync();
+                    .ExecuteAsync().ConfigureAwait(false);
             }
             catch (MsalUiRequiredException ex)
             {
@@ -145,7 +145,16 @@ namespace WinUIMSALApp.MSAL
         }
 
         /// <summary>
-        /// Removed a given user's record from token cache
+        /// Removes the first signed-in user's record from token cache
+        /// </summary>
+        public async void SignOutUser()
+        {
+            var existingUser = await FetchSignedInUserFromCache().ConfigureAwait(false);
+            this.SignOutUser(existingUser);
+        }
+
+        /// <summary>
+        /// Removes a given user's record from token cache
         /// </summary>
         /// <param name="user">The user.</param>
         public async void SignOutUser(IAccount user)
