@@ -79,14 +79,14 @@ namespace WinUIMSALApp.MSAL
         /// Initializes the public client application of MSAL.NET with the required information to correctly authenticate the user.
         /// </summary>
         /// <returns>An IAccount of an already signed-in user (if available)</returns>
-        public async Task<IAccount> InitializePublicClientAppForWAMBrokerAsync()
+        public async Task<IAccount> InitializePublicClientAppForWAMBrokerAsync(IntPtr? handle)
         {
             // Initialize the MSAL library by building a public client application
             this.PublicClientApplication = PublicClientApplicationBuilder.Create(AzureADConfig.ClientId)
                 .WithAuthority(string.Format(AzureADConfig.Authority, AzureADConfig.TenantId))
                 .WithRedirectUri(string.Format(AzureADConfig.RedirectURI, AzureADConfig.ClientId))              // Skipping this will make MSAL fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
                 .WithBrokerPreview(true)
-                .WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); }) // Specify Window handle - (required for WAM).
+                .WithParentActivityOrWindow(() => { return handle.Value; }) // Specify Window handle - (required for WAM).
                 .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false)                // This is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging. Set Identity Logging level to Warning which is a middle ground
                 .WithClientCapabilities(new string[] { "cp1" })                                                 // declare this client app capable of receiving CAE events- https://aka.ms/clientcae
                 .Build();
@@ -131,10 +131,15 @@ namespace WinUIMSALApp.MSAL
                 // A MsalUiRequiredException happened on AcquireTokenSilentAsync. This indicates you need to call AcquireTokenAsync to acquire a token
                 Debug.WriteLine($"MsalUiRequiredException: {ex.Message}");
 
-                // Must be called from UI thread
-                this.AuthResult = await this.PublicClientApplication.AcquireTokenInteractive(scopes)
-                                                  //.WithClaims("{\"id_token\":{\"deviceid\":{\"essential\":true}}}") // you can use WithClaims() to request additional claims, like in this case a compliant device can provide the deviceid claim in token.
-                                                  .ExecuteAsync();
+                try
+                {
+                    // Must be called from UI thread
+                    this.AuthResult = await this.PublicClientApplication.AcquireTokenInteractive(scopes)
+                                                      //.WithClaims("{\"id_token\":{\"deviceid\":{\"essential\":true}}}") // you can use WithClaims() to request additional claims, like in this case a compliant device can provide the deviceid claim in token.
+                                                      .ExecuteAsync();
+
+                }
+                catch { throw; }
             }
             catch (MsalException msalEx)
             {

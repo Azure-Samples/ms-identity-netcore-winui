@@ -1,5 +1,6 @@
 ﻿using Microsoft.Graph;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.UI.Xaml;
 using System;
 using System.Linq;
@@ -16,12 +17,11 @@ namespace WinUIMSALApp
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        //Constant resources
-        private static readonly string _buttonTextAuthorized = "Call Microsoft Graph API";
-
         private MSALClientHelper MSALClientHelper;
 
         private MSGraphHelper MSGraphHelper;
+
+        private IntPtr? _windowHandle = null;
 
         public MainWindow()
         {
@@ -30,12 +30,41 @@ namespace WinUIMSALApp
             this.MSALClientHelper = new MSALClientHelper();
             this.MSGraphHelper = new MSGraphHelper(this.MSALClientHelper);
 
-            var cachedUserAccount = Task.Run(async () => await MSALClientHelper.InitializePublicClientAppAsync()).Result;
+            _windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        }
 
-            if (cachedUserAccount != null)
+        private async void SignInWithDefaultButton_Click(object sender, RoutedEventArgs e)
+        {
+            await MSALClientHelper.InitializePublicClientAppAsync();
+
+            await InitializeGraphAndSetupUI();
+
+        }
+
+        private async void SignInWithBrokerButton_Click(object sender, RoutedEventArgs e)
+        {
+            await MSALClientHelper.InitializePublicClientAppForWAMBrokerAsync(_windowHandle);
+
+            await InitializeGraphAndSetupUI();
+        }
+
+        private async Task InitializeGraphAndSetupUI()
+        {
+            try
             {
-                this.CallGraphButton.Content = _buttonTextAuthorized;
-                this.SignOutButton.Visibility = Visibility.Visible;
+                await MSGraphHelper.SignInAndInitializeGraphServiceClient();
+
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    ResultText.Text = "User has signed-in";
+                    TokenInfoText.Text = "Call Graph API";
+
+                    SetButtonsVisibilityWhenSignedIn();
+                });
+            }
+            catch (Exception ex)
+            {
+                ResultText.Text = ex.Message;
             }
         }
 
@@ -50,16 +79,13 @@ namespace WinUIMSALApp
             // Go back to the UI thread to make changes to the UI
             DispatcherQueue.TryEnqueue(() =>
             {
-                this.CallGraphButton.Content = _buttonTextAuthorized;
-
-                ResultText.Text = "Display Name: " + graphUser.DisplayName + "\nBusiness Phone: " + graphUser.BusinessPhones.FirstOrDefault()
+                ResultText.Text = $"Current time: {DateTime.Now.ToString("HH:mm:ss")}" + "\nDisplay Name: " + graphUser.DisplayName + "\nBusiness Phone: " + graphUser.BusinessPhones.FirstOrDefault()
                                   + "\nGiven Name: " + graphUser.GivenName + "\nid: " + graphUser.Id
                                   + "\nUser Principal Name: " + graphUser.UserPrincipalName;
 
                 DisplayBasicTokenInfo(this.MSALClientHelper.AuthResult);
 
                 this.SignOutButton.Visibility = Visibility.Visible;
-                this.CallGraphButton.Content = _buttonTextAuthorized;
             });
         }
 
@@ -70,15 +96,15 @@ namespace WinUIMSALApp
         {
             try
             {
-                this.MSALClientHelper.SignOutUser(await this.MSALClientHelper.FetchSignedInUserFromCache());
+                var t = await this.MSALClientHelper.FetchSignedInUserFromCache();
+                this.MSALClientHelper.SignOutUser(t);
 
                 DispatcherQueue.TryEnqueue(() =>
                 {
                     ResultText.Text = "User has signed-out";
                     TokenInfoText.Text = string.Empty;
-                    this.CallGraphButton.Visibility = Visibility.Visible;
-                    this.SignOutButton.Visibility = Visibility.Collapsed;
-                    this.CallGraphButton.Content = $"Sign-In and {_buttonTextAuthorized}";
+
+                    SetButtonsVisibilityWhenSignedOut();
                 });
             }
             catch (MsalException ex)
@@ -106,6 +132,22 @@ namespace WinUIMSALApp
         private void DisplayMessage(string message)
         {
             DispatcherQueue.TryEnqueue(() => { ResultText.Text = message; });
+        }
+
+        private void SetButtonsVisibilityWhenSignedIn()
+        {
+            this.CallGraphButton.Visibility = Visibility.Visible;
+            this.SignOutButton.Visibility = Visibility.Visible;
+            this.SignInWithBrokerButton.Visibility = Visibility.Collapsed;
+            this.SignInWithDefaultButton.Visibility = Visibility.Collapsed;
+        }
+
+        private void SetButtonsVisibilityWhenSignedOut()
+        {
+            this.CallGraphButton.Visibility = Visibility.Collapsed;
+            this.SignOutButton.Visibility = Visibility.Collapsed;
+            this.SignInWithBrokerButton.Visibility = Visibility.Visible;
+            this.SignInWithDefaultButton.Visibility = Visibility.Visible;
         }
     }
 }

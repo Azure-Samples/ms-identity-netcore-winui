@@ -49,11 +49,6 @@ namespace WinUIMSALApp.MSAL
         /// <returns></returns>
         public async Task<User> GetMeAsync()
         {
-            if (this._graphServiceClient == null)
-            {
-                await SignInAndInitializeGraphServiceClient();
-            }
-
             User graphUser = null;
 
             // Call /me Api
@@ -76,10 +71,14 @@ namespace WinUIMSALApp.MSAL
         /// Sign in user using MSAL and obtain a token for MS Graph
         /// </summary>
         /// <returns>GraphServiceClient</returns>
-        private async Task<GraphServiceClient> SignInAndInitializeGraphServiceClient()
+        public async Task<GraphServiceClient> SignInAndInitializeGraphServiceClient()
         {
-            string token = await this.MSALClient.SignInUserAndAcquireAccessToken(this.GraphScopes);
-            return await InitializeGraphServiceClientAsync(token);
+            try
+            {
+                string token = await this.MSALClient.SignInUserAndAcquireAccessToken(this.GraphScopes);
+                return await InitializeGraphServiceClientAsync(token);
+            }
+            catch { throw; }
         }
 
         /// <summary>
