@@ -70,8 +70,7 @@ namespace WinUIMSALApp
         {
             try
             {
-                IAccount firstAccount = await this.MSALClientHelper.GetFirstSignedInAccount();
-                this.MSALClientHelper.SignOutUser(firstAccount);
+                this.MSALClientHelper.SignOutUser(await this.MSALClientHelper.FetchSignedInUserFromCache());
 
                 DispatcherQueue.TryEnqueue(() =>
                 {

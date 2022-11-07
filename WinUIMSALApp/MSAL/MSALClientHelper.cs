@@ -21,7 +21,6 @@ namespace WinUIMSALApp.MSAL
         /// <summary>
         /// As for the Tenant, you can use a name as obtained from the azure portal, e.g. kko365.onmicrosoft.com"
         /// </summary>
-
         public readonly AzureADConfig AzureADConfig;
 
         /// <summary>
@@ -30,17 +29,7 @@ namespace WinUIMSALApp.MSAL
         /// <value>
         /// The authentication result.
         /// </value>
-
         public AuthenticationResult AuthResult { get; private set; }
-
-        /// <summary>
-        /// Gets the current user account (if available) from the MSAL token caching mechanism.
-        /// </summary>
-        /// <value>
-        /// The current user account.
-        /// </value>
-
-        public IAccount CurrentUserAccount { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether this instance of PublicClientApp was initialized with a broker .
@@ -48,7 +37,6 @@ namespace WinUIMSALApp.MSAL
         /// <value>
         ///   <c>true</c> if this instance is broker initialized; otherwise, <c>false</c>.
         /// </value>
-
         public bool IsBrokerInitialized { get; private set; }
 
         /// <summary>
@@ -57,13 +45,11 @@ namespace WinUIMSALApp.MSAL
         /// <value>
         /// The public client application.
         /// </value>
-
         public IPublicClientApplication PublicClientApplication { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MSALClientHelper"/> class.
         /// </summary>
-
         public MSALClientHelper()
         {
             // Using appsettings.json as our configuration settings and utilizing IOptions pattern - https://learn.microsoft.com/dotnet/core/extensions/options
@@ -75,33 +61,30 @@ namespace WinUIMSALApp.MSAL
         /// Initializes the public client application of MSAL.NET with the required information to correctly authenticate the user.
         /// </summary>
         /// <returns></returns>
-
         public async Task<IAccount> InitializePublicClientAppAsync()
         {
             // Initialize the MSAL library by building a public client application
             this.PublicClientApplication = PublicClientApplicationBuilder.Create(AzureADConfig.ClientId)
                 .WithAuthority(string.Format(AzureADConfig.Authority, AzureADConfig.TenantId))
-                .WithRedirectUri(string.Format(AzureADConfig.RedirectURL, AzureADConfig.ClientId))  // Skipping this will make MSAL fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
+                .WithRedirectUri(string.Format(AzureADConfig.RedirectURI, AzureADConfig.ClientId))  // Skipping this will make MSAL fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
                 .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false)    // This is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging. Set Identity Logging level to Warning which is a middle ground
                 .WithClientCapabilities(new string[] { "cp1" })                                     // declare this client app capable of receiving CAE events- https://aka.ms/clientcae
                 .Build();
 
-            IEnumerable<IAccount> accounts = await AttachTokenCache();
-            CurrentUserAccount = accounts.FirstOrDefault();
-            return this.CurrentUserAccount;
+            await AttachTokenCache();
+            return await FetchSignedInUserFromCache().ConfigureAwait(false);
         }
 
         /// <summary>
         /// Initializes the public client application of MSAL.NET with the required information to correctly authenticate the user.
         /// </summary>
-        /// <returns></returns>
-
+        /// <returns>An IAccount of an already signed-in user (if available)</returns>
         public async Task<IAccount> InitializePublicClientAppForWAMBrokerAsync()
         {
             // Initialize the MSAL library by building a public client application
             this.PublicClientApplication = PublicClientApplicationBuilder.Create(AzureADConfig.ClientId)
                 .WithAuthority(string.Format(AzureADConfig.Authority, AzureADConfig.TenantId))
-                .WithRedirectUri(string.Format(AzureADConfig.RedirectURL, AzureADConfig.ClientId))              // Skipping this will make MSAL fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
+                .WithRedirectUri(string.Format(AzureADConfig.RedirectURI, AzureADConfig.ClientId))              // Skipping this will make MSAL fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
                 .WithBrokerPreview(true)
                 .WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); }) // Specify Window handle - (required for WAM).
                 .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false)                // This is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging. Set Identity Logging level to Warning which is a middle ground
@@ -110,16 +93,14 @@ namespace WinUIMSALApp.MSAL
 
             this.IsBrokerInitialized = true;
 
-            IEnumerable<IAccount> accounts = await AttachTokenCache();
-            CurrentUserAccount = accounts.FirstOrDefault();
-            return this.CurrentUserAccount;
+            await AttachTokenCache();
+            return await FetchSignedInUserFromCache().ConfigureAwait(false);
         }
 
         /// <summary>
         /// Attaches the token cache to the Public Client app.
         /// </summary>
-        /// <returns></returns>
-
+        /// <returns>An IAccount instance of an already signed-in user (if available)</returns>
         public async Task<IEnumerable<IAccount>> AttachTokenCache()
         {
             // Cache configuration and hook-up to public application. Refer to https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/wiki/Cross-platform-Token-Cache#configuring-the-token-cache
@@ -127,8 +108,8 @@ namespace WinUIMSALApp.MSAL
             var msalcachehelper = await MsalCacheHelper.CreateAsync(storageProperties);
             msalcachehelper.RegisterCache(PublicClientApplication.UserTokenCache);
 
-            var accounts = await PublicClientApplication.GetAccountsAsync();
-            return accounts;
+            // If the cache file is being reused, we'd find some already-signed-in accounts 
+            return await PublicClientApplication.GetAccountsAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -138,11 +119,11 @@ namespace WinUIMSALApp.MSAL
         /// <returns> Access Token</returns>
         public async Task<string> SignInUserAndAcquireAccessToken(string[] scopes)
         {
-            this.CurrentUserAccount ??= (await this.PublicClientApplication.GetAccountsAsync()).FirstOrDefault();
+            var existingUser = await FetchSignedInUserFromCache().ConfigureAwait(false);
 
             try
             {
-                this.AuthResult = await this.PublicClientApplication.AcquireTokenSilent(scopes, this.CurrentUserAccount)
+                this.AuthResult = await this.PublicClientApplication.AcquireTokenSilent(scopes, existingUser)
                     .ExecuteAsync();
             }
             catch (MsalUiRequiredException ex)
@@ -163,15 +144,13 @@ namespace WinUIMSALApp.MSAL
             return this.AuthResult.AccessToken;
         }
 
+        /// <summary>
+        /// Removed a given user's record from token cache
+        /// </summary>
+        /// <param name="user">The user.</param>
         public async void SignOutUser(IAccount user)
         {
             await this.PublicClientApplication.RemoveAsync(user).ConfigureAwait(false);
-        }
-
-        public async Task<IAccount> GetFirstSignedInAccount()
-        {
-            IEnumerable<IAccount> accounts = await this.PublicClientApplication.GetAccountsAsync().ConfigureAwait(false);
-            return accounts.FirstOrDefault();
         }
 
         /// <summary>
@@ -180,15 +159,14 @@ namespace WinUIMSALApp.MSAL
         /// <param name="scopes">The scopes.</param>
         /// <param name="extraclaims">The extra claims, usually from CAE. We basically handle CAE by sending the user back to Azure AD for additional processing and requesting a new access token for Graph</param>
         /// <returns></returns>
-
         public async Task<String> SignInUserAndAcquireAccessToken(string[] scopes, string extraclaims)
         {
-            this.CurrentUserAccount ??= (await this.PublicClientApplication.GetAccountsAsync()).FirstOrDefault();
+            var existingUser = await FetchSignedInUserFromCache().ConfigureAwait(false);
 
             try
             {
-                // Send the user to Azure for re-authentication
-                this.AuthResult = await PublicClientApplication.AcquireTokenInteractive(scopes).WithAccount(this.CurrentUserAccount)
+                // Send the user to Azure AD for re-authentication as a silent acquisition wont resolve any CAE scenarios
+                this.AuthResult = await PublicClientApplication.AcquireTokenInteractive(scopes).WithAccount(existingUser)
                                 .WithClaims(extraclaims).ExecuteAsync();
             }
             catch (MsalException msalEx)
@@ -201,16 +179,16 @@ namespace WinUIMSALApp.MSAL
 
         private async Task<AuthenticationResult> LoginSilentAndInteractiveAsync(string[] scopes)
         {
-            var existingAccount = await FetchAnExistingAccountFromCache().ConfigureAwait(false);
+            var existingUser = await FetchSignedInUserFromCache().ConfigureAwait(false);
 
             try
             {
                 // 1. Try to sign-in the previously signed-in account
-                if (existingAccount != null)
+                if (existingUser != null)
                 {
                     Console.WriteLine("Found account in the cache - trying to use it");
 
-                    return await this.PublicClientApplication.AcquireTokenSilent(scopes, existingAccount)
+                    return await this.PublicClientApplication.AcquireTokenSilent(scopes, existingUser)
                             .ExecuteAsync();
                 }
                 // 2. If it does not exist, try to sign in with the OS account. Only Windows broker supports this
@@ -233,7 +211,7 @@ namespace WinUIMSALApp.MSAL
             }
 
             // 3. If all else fails, use interactive auth
-            return await LoginInteractiveAsync(scopes, existingAccount).ConfigureAwait(false);
+            return await LoginInteractiveAsync(scopes, existingUser).ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> LoginInteractiveAsync(string[] scopes, IAccount existingAccount = null)
@@ -257,7 +235,12 @@ namespace WinUIMSALApp.MSAL
             }).ExecuteAsync().ConfigureAwait(false);
         }
 
-        private async Task<IAccount> FetchAnExistingAccountFromCache()
+        /// <summary>
+        /// Fetches the signed in user from MSAL's token cache (if available).
+        /// </summary>
+        /// <returns></returns>
+        /// <autogeneratedoc />
+        public async Task<IAccount> FetchSignedInUserFromCache()
         {
             // get accounts from cache
             IEnumerable<IAccount> accounts = await this.PublicClientApplication.GetAccountsAsync().ConfigureAwait(false);
@@ -271,6 +254,7 @@ namespace WinUIMSALApp.MSAL
                 {
                     await this.PublicClientApplication.RemoveAsync(acc);
                 }
+
                 return null;
             }
 

@@ -38,12 +38,12 @@ namespace WinUIMSALApp.MSAL
         public string TenantId { get; set; }
 
         /// <summary>
-        /// Gets or sets the redirect URL of this app as provided in the app registration portal.
+        /// Gets or sets the redirect URI of this app as provided in the app registration portal.
         /// </summary>
         /// <value>
         /// The redirect URL.
         /// </value>
-        public string RedirectURL { get; set; }
+        public string RedirectURI { get; set; }
   
         /// <summary>
         /// Gets or sets the file name of the token cache file.
