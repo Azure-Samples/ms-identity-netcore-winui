@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.UI.Xaml;
 using System;
 using System.Linq;
