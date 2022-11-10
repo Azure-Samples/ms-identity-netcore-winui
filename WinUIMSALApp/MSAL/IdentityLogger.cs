@@ -1,8 +1,12 @@
 ﻿using Microsoft.IdentityModel.Abstractions;
 using System.Diagnostics;
 
-namespace WinUIMSALApp.Logging
+namespace WinUIMSALApp.MSAL
 {
+    /// <summary>
+    /// An example of how to use MSAL.NET logging
+    /// </summary>
+    /// <seealso cref="IIdentityLogger" />
     public class IdentityLogger : IIdentityLogger
     {
         private EventLogLevel _minLogLevel = EventLogLevel.LogAlways;

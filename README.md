@@ -3,7 +3,7 @@ page_type: sample
 name: Authenticate users with MSAL.NET in a WinUI desktop application 
 description: This sample demonstrates how to use the [Microsoft Authentication Library (MSAL) for .NET](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) to get an access token and call the Microsoft Graph using the MS Graph SDK from a WinUI application.
 languages:
- - csharp
+ -  csharp
 products:
  - azure-active-directory
  - msal-net
@@ -43,7 +43,7 @@ This sample demonstrates a WinUI Desktop app that authenticates users against Az
 
 This sample demonstrates a WinUI Desktop app that authenticates users against Azure AD.
 
-1. The client WinUI Desktop app uses the [MSAL.NET](http://aka.ms/msal-net) to sign-in a user and obtain a JWT [ID Token](https://aka.ms/id-tokens) from **Azure AD**.
+1. The client WinUI Desktop app uses the [MSAL.NET](https://aka.ms/msal-net) to sign-in a user and obtain a JWT [ID Token](https://aka.ms/id-tokens) from **Azure AD**.
 1. The **ID Token** proves that the user has successfully authenticated against **Azure AD**.
 
 ![Scenario Image](./ReadmeFiles/topology.png)
@@ -54,6 +54,7 @@ This sample demonstrates a WinUI Desktop app that authenticates users against Az
 * An **Azure AD** tenant. For more information, see: [How to get an Azure AD tenant](https://docs.microsoft.com/azure/active-directory/develop/test-setup-environment#get-a-test-tenant)
 * A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**. If you're signed in to the [Azure portal](https://portal.azure.com) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
 * [Windows App SDK C# VS2022 Templates](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads)
+
 
 ## Setup the sample
 
@@ -68,6 +69,7 @@ git clone https://github.com/Azure-Samples/ms-identity-netcore-winui.git
 or download and extract the repository *.zip* file.
 
 > :warning: To avoid path length limitations on Windows, we recommend cloning into a directory near the root of your drive.
+
 
 ### Step 3: Register the sample application(s) in your tenant
 
@@ -109,19 +111,18 @@ To manually register the apps, as a first step you'll need to:
 1. Sign in to the [Azure portal](https://portal.azure.com).
 1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD tenant.
 
-#### Register the client app (WinUI-App-Calling-MsGraph)
+#### Register the client app (WinUI-App-Calling-MSGraph)
 
 1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure Active Directory** service.
 1. Select the **App Registrations** blade on the left, then select **New registration**.
 1. In the **Register an application page** that appears, enter your application's registration information:
-    1. In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `WinUI-App-Calling-MsGraph`.
+    1. In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `WinUI-App-Calling-MSGraph`.
     1. Under **Supported account types**, select **Accounts in this organizational directory only**
     1. Select **Register** to create the application.
 1. In the **Overview** blade, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
 1. In the app's registration screen, select the **Authentication** blade to the left.
 1. If you don't have a platform added, select **Add a platform** and select the **Public client (mobile & desktop)** option.
     1. In the **Redirect URIs** section, add **ms-appx-web://microsoft.aad.brokerplugin/{ClientId}**.
-
         The **ClientId** is the Id of the App Registration and can be found under **Overview/Application (client) ID**
     1. Click **Save** to save your changes.
 1. Since this app signs-in users, we will now proceed to select **delegated permissions**, which is is required by apps signing-in users.
@@ -142,7 +143,7 @@ To manually register the apps, as a first step you'll need to:
     > Provides user's account status in tenant. If the user is a **member** of the tenant, the value is *0*. If they're a **guest**, the value is *1*.
     1. Select **Add** to save your changes.
 
-##### Configure the client app (WinUI-App-Calling-MsGraph) to use your app registration
+##### Configure the client app (WinUI-App-Calling-MSGraph) to use your app registration
 
 Open the project in your IDE (like Visual Studio or Visual Studio Code) to configure the code.
 
@@ -150,7 +151,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 1. Open the `WinUIMSALApp\appsettings.json` file.
 1. Find the key `TenantId` and replace the existing value with your Azure AD tenant/directory ID.
-1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of `WinUI-App-Calling-MsGraph` app copied from the Azure portal.
+1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of `WinUI-App-Calling-MSGraph` app copied from the Azure portal.
 
 ### Step 4: Running the sample
 
@@ -164,6 +165,9 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
   Start running the sample by pressing `WinUIMSALApp (Package)` button on Visual Studio menu bar.
 
   No information is displayed because you're not logged in.
+
+  Two options are provided to you , you can either use the regular sign-in or use the Windows 10 WAM broker to sign-in the user instead.
+  
   Click `Sign-In and Call Microsoft Graph API` button.
 
   The UI similar to Web Browser will be displayed and give you a chance to select a user and login. You might be asked to consent to access your data on Graph API.
@@ -238,57 +242,120 @@ If you find a bug in the sample, raise the issue on [GitHub Issues](../../../../
 
 <details>
  <summary>Expand the section</summary>
+
 For general information about how the project is organized, refer to the [tutorial](https://learn.microsoft.com/windows/apps/winui/winui3/create-your-first-winui3-app)
 
-The constructor of `MainWindow` class was modified by adding a configuration, MSAL Authentication and token caching capability:
+The constructor of `MainWindow` class was modified by adding code to read configuration, and initialize MSAL and MS Graph helper classes :
 
 ```csharp
    
     var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-    _winUiSettings = configuration.GetSection("AzureAAD").Get<WinUISettings>();
 
-    
-    _PublicClientApp = PublicClientApplicationBuilder.Create(_winUiSettings.ClientId)
-        .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
-        .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId)) 
-        .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) 
-        .Build();
+        // Read configuration
+    AzureADConfig azureADConfig = configuration.GetSection("AzureAD").Get<AzureADConfig>();
+    this.MSALClientHelper = new MSALClientHelper(azureADConfig);
 
-    var storageProperties = new StorageCreationPropertiesBuilder(_winUiSettings.CacheFileName, _winUiSettings.CacheDir).Build();
-    Task.Run(async () => await MsalCacheHelper.CreateAsync(storageProperties)).Result.RegisterCache(_PublicClientApp.UserTokenCache);
+    MSGraphApiConfig graphApiConfig = configuration.GetSection("MSGraphApi").Get<MSGraphApiConfig>();
+    this.MSGraphHelper = new MSGraphHelper(graphApiConfig, this.MSALClientHelper);
 ```
 
-Every time a sign-in button is clicked and `CallGraphButton_Click` callback function is called, new `MsGraph` client is created by obtaining access token silently or interactively. Then a call to Graph API is done.
-
-The access token is obtained inside `SignInUserAndGetTokenUsingMSAL` method, if there is no token cache available, then exception thrown and interactive session takes place, where a user should provide credentials and may also be asked to consent.
+The following code in *MSALClientHelper.cs* initializes the MSAL's [PublicClientApplication](https://learn.microsoft.com/azure/active-directory/develop/msal-client-applications) from the various configuration settings
 
 ```csharp
-    private async Task<string> SignInUserAndGetTokenUsingMSAL(string[] scopes)
-        {
-            _currentUserAccount = _currentUserAccount ?? (await _PublicClientApp.GetAccountsAsync()).FirstOrDefault();
-            try
-            {
-                _authResult = await _PublicClientApp.AcquireTokenSilent(scopes, _currentUserAccount).ExecuteAsync();
-                DispatcherQueue.TryEnqueue(() =>
-                {
-                    this.CallGraphButton.Content = _buttonTextAuthorized;
-                });
-            }
-            catch (MsalUiRequiredException ex)
-            {
-                Debug.WriteLine($"MsalUiRequiredException: {ex.Message}");
+    private void InitializePublicClientApplicationBuilder()
+    {
+        this.PublicClientApplicationBuilder = PublicClientApplicationBuilder.Create(AzureADConfig.ClientId)
+            .WithAuthority(string.Format(AzureADConfig.Authority, AzureADConfig.TenantId))
+            .WithRedirectUri(string.Format(AzureADConfig.RedirectURI, AzureADConfig.ClientId))      // Skipping this will make MSAL fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
+            .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false)        // This is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging. Set Identity Logging level to Warning which is a middle ground
+            .WithClientCapabilities(new string[] { "cp1" });                                        // declare this client app capable of receiving CAE events- https://aka.ms/clientcae
+    }
+```
 
-                _authResult = await _PublicClientApp.AcquireTokenInteractive(scopes)
-                                                  .ExecuteAsync();
-            }
-            return _authResult.AccessToken;
+Additionally the *MSALClientHelper.cs* has two methods that further prepare the MSAL's PublicClient instance with a [token cache](https://learn.microsoft.com/azure/active-directory/develop/msal-net-token-cache-serialization) to sign-in using the standard authentication flow.
+
+```csharp
+
+    public async Task<IAccount> InitializePublicClientAppAsync()
+    {
+        // Initialize the MSAL library by building a public client application
+        this.PublicClientApplication = this.PublicClientApplicationBuilder.Build();
+
+        await AttachTokenCache();
+        return await FetchSignedInUserFromCache().ConfigureAwait(false);
+    }
+```
+
+or using the WAM broker. This method is called when `SignInWithBrokerButton_Click` is pressed
+
+```csharp
+    public async Task<IAccount> InitializePublicClientAppForWAMBrokerAsync(IntPtr? handle)
+    {
+        // Initialize the MSAL library by building a public client application for authenticating using WAM
+        this.PublicClientApplication = this.PublicClientApplicationBuilder
+                .WithBrokerPreview(true)
+                .WithParentActivityOrWindow(() => { return handle.Value; }) // Specify Window handle - (required for WAM).
+                .Build();
+
+        this.IsBrokerInitialized = true;
+
+        await AttachTokenCache();
+        return await FetchSignedInUserFromCache().ConfigureAwait(false);
+    }        
+```
+
+finally the method `SignInTheUser()` takes care of signing-in the user and obtaining an Access Token for Microsoft Graph. if there is no tokens cached, an interactive authentication session takes place, where a user has to provide credentials and may also be asked to consent.
+
+```csharp
+    private async Task SignInTheUser()
+    {
+        try
+        {
+            // Trigger sign-in and token acquisition flow
+            await MSGraphHelper.SignInAndInitializeGraphServiceClient();
+
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                ResultText.Text = "User has signed-in successfully";
+                TokenInfoText.Text = "Call Graph API";
+
+                SetButtonsVisibilityWhenSignedIn();
+            });
         }
+        catch (Exception ex)
+        {
+            ResultText.Text = ex.Message;
+        }
+    }
+```
+
+When the `CallGraphButton_Click` function is called, new `MSGraphHelper` client is used to call the various Graph API. Then a call to Graph API is done.
+
+The access token is obtained inside `SignInUserAndGetTokenUsingMSAL` method,
+
+```csharp
+    // Call the /me endpoint of Graph
+    User graphUser = await this.MSGraphHelper.GetMeAsync();
+
+    // Go back to the UI thread to make changes to the UI
+    DispatcherQueue.TryEnqueue(() =>
+    {
+        ResultText.Text = $"Current time: {DateTime.Now.ToString("HH:mm:ss")}" + "\nDisplay Name: " + graphUser.DisplayName + "\nBusiness Phone: " + graphUser.BusinessPhones.FirstOrDefault()
+                            + "\nGiven Name: " + graphUser.GivenName + "\nid: " + graphUser.Id
+                            + "\nUser Principal Name: " + graphUser.UserPrincipalName;
+
+        DisplayBasicTokenInfo(this.MSALClientHelper.AuthResult);
+
+        this.SignOutButton.Visibility = Visibility.Visible;
+    });
 ```
 
 To understand more how the buttons are linked to the callback functions, open `MainWindow.xaml` file and learn the below lines, notice Click properties:
 
 ```xml
-    <Button x:Name="CallGraphButton" Content="Sign-In and Call Microsoft Graph API" HorizontalAlignment="Right" Padding="5" Click="CallGraphButton_Click" Margin="5" FontFamily="Segoe Ui"/>
+    <Button x:Name="CallGraphButton" Content="Call Microsoft Graph API" HorizontalAlignment="Right" Padding="5" Click="CallGraphButton_Click" Margin="5" Visibility="Collapsed" FontFamily="Segoe Ui"/>
+    <Button x:Name="SignInWithDefaultButton" Content="Sign-In" HorizontalAlignment="Left" Padding="10" Click="SignInWithDefaultButton_Click" Margin="5" FontFamily="Segoe Ui"/>
+    <Button x:Name="SignInWithBrokerButton" Content="Sign-In with WAM Broker" HorizontalAlignment="Right" Padding="10" Click="SignInWithBrokerButton_Click" Margin="5" FontFamily="Segoe Ui"/>
     <Button x:Name="SignOutButton" Content="Sign-Out" HorizontalAlignment="Right" Padding="5" Click="SignOutButton_Click" Margin="5" Visibility="Collapsed" FontFamily="Segoe Ui"/>
 
 ```
@@ -297,25 +364,75 @@ To understand more how the buttons are linked to the callback functions, open `M
 
 MSAL is also able to call [Web Account Manager](https://learn.microsoft.com/windows/uwp/security/web-account-manager), a Windows 10 component that ships with the OS. This component acts as an authentication broker and users of your app benefit from integration with accounts known from Windows, such as the account you signed-in with in your Windows session.
 
-The constructor of `MainWindow` class can be modified further to utilize WAM for authentication by making the following changes to the code:
+> Setting up a machine and its environment for WAM is a fairly involved task and beyond the scope of this code sample. We advise you work with your tenant administrators to ascertain of your organization's Azure AD tenant is set up for WAM and the device is joined to that Azure AD tenant. 
+
+The methods `MSALClientHelper` class can be referenced to lean about WAM initialization:
 
 ```csharp
    
-    _publicClientApp = PublicClientApplicationBuilder.Create(_winUiSettings.ClientId)
-        .WithAuthority(string.Format(_winUiSettings.Authority, _winUiSettings.TenantId))
-        //if not using this, it will fall back to older Uri: urn:ietf:wg:oauth:2.0:oob
-        .WithRedirectUri(string.Format(_winUiSettings.RedirectURL, _winUiSettings.ClientId))
+public async Task<IAccount> InitializePublicClientAppForWAMBrokerAsync(IntPtr? handle)
+{
+    // Initialize the MSAL library by building a public client application for authenticating using WAM
+    this.PublicClientApplication = this.PublicClientApplicationBuilder
+            .WithBrokerPreview(true)
+            .WithParentActivityOrWindow(() => { return handle.Value; })// Specify Window handle - (required for WAM).
+            .Build();
 
-        //Using WAM - https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview
-        .WithBrokerPreview(true)
-        .WithParentActivityOrWindow(() => { return WinRT.Interop.WindowNative.GetWindowHandle(this); })
-        
-        //this is the currently recommended way to log MSAL message. For more info refer to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
-        .WithLogging(new IdentityLogger(EventLogLevel.Warning), enablePiiLogging: false) //set Identity Logging level to Warning which is a middle ground
-        .Build();
+    this.IsBrokerInitialized = true;
+
+    await AttachTokenCache();
+    return await FetchSignedInUserFromCache().ConfigureAwait(false);
+}
 ```
 
+```csharp
+    if (this.IsBrokerInitialized)
+    {
+        Console.WriteLine("No accounts found in the cache. Trying Window's default account.");
+
+        this.AuthResult = await this.PublicClientApplication
+            .AcquireTokenSilent(scopes, Microsoft.Identity.Client.PublicClientApplication.OperatingSystemAccount)
+            .ExecuteAsync()
+            .ConfigureAwait(false);
+    }
+    else
+    {
+        this.AuthResult = await SignInUserInteractivelyAsync(scopes);
+    }
+```                    
+
 Refer to [MSAL WAM](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/wam#to-enable-wam-preview) for more details on how to write code for this.
+
+### Process the CAE challenge from Microsoft Graph
+
+To process the CAE challenge from Microsoft Graph, the controller actions need to extract it from the `wwwAuthenticate` header. It is returned when MS Graph rejects a seemingly valid Access tokens for MS Graph. For this you need to:
+
+1. To tell AAD that your app is ready to handle claim challenges, use `.WithClientCapabilities` method when creating Public Client app
+
+   ```csharp
+    .WithClientCapabilities(new string[] { "cp1" }) //client capabilities for CAE - https://learn.microsoft.com/azure/active-directory/develop/app-resilience-continuous-access-evaluation?tabs=dotnet
+   ```
+
+2. Catch `ServiceException` thrown by Graph API, try to obtain new token interactively, create Graph API client with the new token:
+
+   ```csharp
+     catch (ServiceException ex) when (ex.Message.Contains("Continuous access evaluation resulted in claims challenge"))
+        {
+            //**************************************************************
+            // Handle a claims challenge produced by CAE by requesting a new access token with more claims
+            //**************************************************************
+
+            // Get challenge from response of Graph API
+            var claimChallenge = WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(ex.ResponseHeaders);
+
+            // Use the challenge to obtain fresh token
+            _authResult = await _publicClientApp.AcquireTokenInteractive(scopes).WithClaims(claimChallenge).ExecuteAsync();
+
+            // Sign-in user using MSAL and fresh token for MS Graph
+            graphClient = await SignInAndInitializeGraphServiceClient(scopes, _authResult.AccessToken);
+        }
+   ```
+
 </details>
 
 ## How the code was created

@@ -6,6 +6,9 @@
   Start running the sample by pressing `WinUIMSALApp (Package)` button on Visual Studio menu bar.
 
   No information is displayed because you're not logged in.
+
+  Two options are provided to you , you can either use the regular sign-in or use the Windows 10 WAM broker to sign-in the user instead.
+  
   Click `Sign-In and Call Microsoft Graph API` button.
 
   The UI similar to Web Browser will be displayed and give you a chance to select a user and login. You might be asked to consent to access your data on Graph API.

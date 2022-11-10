@@ -149,10 +149,10 @@ Function ConfigureApplications
     # Connect to the Microsoft Graph API, non-interactive is not supported for the moment (Oct 2021)
     Write-Host "Connecting to Microsoft Graph"
     if ($tenantId -eq "") {
-        Connect-MgGraph -Scopes "Organization.Read.All Application.ReadWrite.All" -Environment $azureEnvironmentName
+        Connect-MgGraph -Scopes "User.Read.All Organization.Read.All Application.ReadWrite.All" -Environment $azureEnvironmentName
     }
     else {
-        Connect-MgGraph -TenantId $tenantId -Scopes "Organization.Read.All Application.ReadWrite.All" -Environment $azureEnvironmentName
+        Connect-MgGraph -TenantId $tenantId -Scopes "User.Read.All Organization.Read.All Application.ReadWrite.All" -Environment $azureEnvironmentName
     }
     
     $context = Get-MgContext
@@ -173,12 +173,11 @@ Function ConfigureApplications
     Write-Host ("Connected to Tenant {0} ({1}) as account '{2}'. Domain is '{3}'" -f  $Tenant.DisplayName, $Tenant.Id, $currentUserPrincipalName, $verifiedDomainName)
 
    # Create the client AAD application
-   Write-Host "Creating the AAD application (WinUI-App-Calling-MsGraph)"
+   Write-Host "Creating the AAD application (WinUI-App-Calling-MSGraph)"
    # create the application 
-   $clientAadApplication = New-MgApplication -DisplayName "WinUI-App-Calling-MsGraph" `
+   $clientAadApplication = New-MgApplication -DisplayName "WinUI-App-Calling-MSGraph" `
                                                       -PublicClient `
                                                       @{ `
-                                                      RedirectUris = "ms-appx-web://microsoft.aad.brokerplugin/{ClientId}"; `
                                                         } `
                                                        -SignInAudience AzureADMyOrg `
                                                       #end of command
@@ -186,8 +185,10 @@ Function ConfigureApplications
     $currentAppId = $clientAadApplication.AppId
     $currentAppObjectId = $clientAadApplication.Id
 
-    $replyUrlForApp = "ms-appx-web://microsoft.aad.brokerplugin/"+$currentAppId+""
-    Update-MgApplication -ApplicationId $currentAppObjectId -PublicClient @{RedirectUris=$replyUrlForApp}
+    $replyUrlsForApp = "ms-appx-web://microsoft.aad.brokerplugin/$currentAppId"
+    Update-MgApplication -ApplicationId $currentAppObjectId -PublicClient @{RedirectUris=$replyUrlsForApp}
+    $tenantName = (Get-MgApplication -ApplicationId $currentAppObjectId).PublisherDomain
+    #Update-MgApplication -ApplicationId $currentAppObjectId -IdentifierUris @("https://$tenantName/WinUI-App-Calling-MSGraph")
     
     # create the service principal of the newly created application     
     $clientServicePrincipal = New-MgServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
@@ -212,13 +213,13 @@ Function ConfigureApplications
     $newClaim =  CreateOptionalClaim  -name "acct" 
     $optionalClaims.IdToken += ($newClaim)
     Update-MgApplication -ApplicationId $currentAppObjectId -OptionalClaims $optionalClaims
-    Write-Host "Done creating the client application (WinUI-App-Calling-MsGraph)"
+    Write-Host "Done creating the client application (WinUI-App-Calling-MSGraph)"
 
     # URL of the AAD application in the Azure portal
     # Future? $clientPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$currentAppId+"/objectId/"+$currentAppObjectId+"/isMSAApp/"
     $clientPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$currentAppId+"/objectId/"+$currentAppObjectId+"/isMSAApp/"
 
-    Add-Content -Value "<tr><td>client</td><td>$currentAppId</td><td><a href='$clientPortalUrl'>WinUI-App-Calling-MsGraph</a></td></tr>" -Path createdApps.html
+    Add-Content -Value "<tr><td>client</td><td>$currentAppId</td><td><a href='$clientPortalUrl'>WinUI-App-Calling-MSGraph</a></td></tr>" -Path createdApps.html
     # Declare a list to hold RRA items    
     $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Graph.PowerShell.Models.MicrosoftGraphRequiredResourceAccess]
 
@@ -238,7 +239,7 @@ Function ConfigureApplications
     
 
     # print the registered app portal URL for any further navigation
-    Write-Host "Successfully registered and configured that app registration for 'WinUI-App-Calling-MsGraph' at `n $clientPortalUrl" -ForegroundColor Green 
+    Write-Host "Successfully registered and configured that app registration for 'WinUI-App-Calling-MSGraph' at `n $clientPortalUrl" -ForegroundColor Green 
     
     # Update config file for 'client'
     # $configFile = $pwd.Path + "\..\WinUIMSALApp\appsettings.json"
