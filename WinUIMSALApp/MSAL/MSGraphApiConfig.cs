@@ -20,7 +20,7 @@ namespace WinUIMSALApp.MSAL
         /// Gets or sets the scopes for MS graph call.
         /// </summary>
         /// <value>
-        /// The scopes.
+        /// The scopes as space separated string.
         /// </value>
         public string Scopes { get; set; }
 
@@ -28,7 +28,7 @@ namespace WinUIMSALApp.MSAL
         /// Gets the scopes in a format as expected by the various MSAL SDK methods.
         /// </summary>
         /// <value>
-        /// The scopes.
+        /// The scopes as array.
         /// </value>
         public string[] ScopesArray
         {

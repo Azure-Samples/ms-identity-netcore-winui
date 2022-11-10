@@ -57,7 +57,7 @@ namespace WinUIMSALApp.MSAL
         /// Gets or sets the token cache file dir.
         /// </summary>
         /// <value>
-        /// The cache dir.
+        /// The token cache dir.
         /// </value>
         public string CacheDir { get; set; }
     }

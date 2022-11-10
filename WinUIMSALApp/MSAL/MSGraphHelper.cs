@@ -23,20 +23,19 @@ namespace WinUIMSALApp.MSAL
         private string MSGraphBaseUrl = "https://graph.microsoft.com/v1.0";
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MSGraphHelper"/> class.
+        /// Initializes a new instance of the <see cref="MSGraphHelper" /> class.
         /// </summary>
+        /// <param name="graphApiConfig">The graph API configuration.</param>
         /// <param name="msalClientHelper">The MSALClientHelper helper instance.</param>
         /// <exception cref="System.ArgumentNullException">msalClientHelper</exception>
-        public MSGraphHelper(MSALClientHelper msalClientHelper)
+        public MSGraphHelper(MSGraphApiConfig graphApiConfig, MSALClientHelper msalClientHelper)
         {
             if (msalClientHelper == null)
             {
                 throw new ArgumentNullException(nameof(msalClientHelper));
             }
 
-            // Load configuration
-            var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-            this.MSGraphApiConfig = configuration.GetSection("MSGraphApi").Get<MSGraphApiConfig>();
+            this.MSGraphApiConfig = graphApiConfig;
 
             this.MSALClient = msalClientHelper;
             this.GraphScopes = this.MSGraphApiConfig.ScopesArray;
@@ -73,12 +72,8 @@ namespace WinUIMSALApp.MSAL
         /// <returns>GraphServiceClient</returns>
         public async Task<GraphServiceClient> SignInAndInitializeGraphServiceClient()
         {
-            try
-            {
-                string token = await this.MSALClient.SignInUserAndAcquireAccessToken(this.GraphScopes);
-                return await InitializeGraphServiceClientAsync(token);
-            }
-            catch { throw; }
+            string token = await this.MSALClient.SignInUserAndAcquireAccessToken(this.GraphScopes);
+            return await InitializeGraphServiceClientAsync(token);
         }
 
         /// <summary>
@@ -107,7 +102,6 @@ namespace WinUIMSALApp.MSAL
             this._graphServiceClient = new GraphServiceClient(this.MSGraphBaseUrl,
                             new DelegateAuthenticationProvider(async (requestMessage) =>
                             {
-                                // Don't try to sign-in if token was supplied as an input parameter
                                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("bearer", await Task.FromResult(token));
                             }));
 

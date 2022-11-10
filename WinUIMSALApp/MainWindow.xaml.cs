@@ -1,4 +1,5 @@
-﻿using Microsoft.Graph;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.UI.Xaml;
@@ -21,42 +22,47 @@ namespace WinUIMSALApp
 
         private MSGraphHelper MSGraphHelper;
 
-        private IntPtr? _windowHandle = null;
-
         public MainWindow()
         {
             InitializeComponent();
 
-            this.MSALClientHelper = new MSALClientHelper();
-            this.MSGraphHelper = new MSGraphHelper(this.MSALClientHelper);
+            // Using appsettings.json as our configuration settings and utilizing IOptions pattern - https://learn.microsoft.com/dotnet/core/extensions/options
+            var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
-            _windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            // Read configuration
+            AzureADConfig azureADConfig = configuration.GetSection("AzureAD").Get<AzureADConfig>();
+            this.MSALClientHelper = new MSALClientHelper(azureADConfig);
+
+            MSGraphApiConfig graphApiConfig = configuration.GetSection("MSGraphApi").Get<MSGraphApiConfig>();
+            this.MSGraphHelper = new MSGraphHelper(graphApiConfig, this.MSALClientHelper);
         }
 
         private async void SignInWithDefaultButton_Click(object sender, RoutedEventArgs e)
         {
             await MSALClientHelper.InitializePublicClientAppAsync();
 
-            await InitializeGraphAndSetupUI();
+            await SignInTheUser();
 
         }
 
         private async void SignInWithBrokerButton_Click(object sender, RoutedEventArgs e)
         {
+            IntPtr? _windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
             await MSALClientHelper.InitializePublicClientAppForWAMBrokerAsync(_windowHandle);
 
-            await InitializeGraphAndSetupUI();
+            await SignInTheUser();
         }
 
-        private async Task InitializeGraphAndSetupUI()
+        private async Task SignInTheUser()
         {
             try
             {
+                // Trigger sign-in and token acquisition flow
                 await MSGraphHelper.SignInAndInitializeGraphServiceClient();
 
                 DispatcherQueue.TryEnqueue(() =>
                 {
-                    ResultText.Text = "User has signed-in";
+                    ResultText.Text = "User has signed-in successfully";
                     TokenInfoText.Text = "Call Graph API";
 
                     SetButtonsVisibilityWhenSignedIn();
