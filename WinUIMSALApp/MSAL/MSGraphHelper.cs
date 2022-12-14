@@ -85,7 +85,7 @@ namespace WinUIMSALApp.MSAL
         /// <returns>GraphServiceClient</returns>
         public async Task<GraphServiceClient> SignInAndInitializeGraphServiceClient()
         {
-            string token = await this.MSALClient.SignInUserAndAcquireAccessToken(this.GraphScopes);
+            string token = await this.MSALClient.SignInUserAndAcquireAccessToken(new string[] { "REPLACE_THIS_WITH_YOUR_SCOPES" });
             return await InitializeGraphServiceClientAsync(token);
         }
 

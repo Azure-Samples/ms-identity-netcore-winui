@@ -10,9 +10,7 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel Background="Azure">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="CallGraphButton" Content="Call Microsoft Graph API" HorizontalAlignment="Right" Padding="5" Click="CallGraphButton_Click" Margin="5" Visibility="Collapsed" FontFamily="Segoe Ui"/>
                 <Button x:Name="SignInWithDefaultButton" Content="Sign-In" HorizontalAlignment="Left" Padding="10" Click="SignInWithDefaultButton_Click" Margin="5" FontFamily="Segoe Ui"/>
-                <Button x:Name="SignInWithBrokerButton" Content="Sign-In with WAM Broker" HorizontalAlignment="Right" Padding="10" Click="SignInWithBrokerButton_Click" Margin="5" FontFamily="Segoe Ui"/>
                 <Button x:Name="SignOutButton" Content="Sign-Out" HorizontalAlignment="Right" Padding="5" Click="SignOutButton_Click" Margin="5" Visibility="Collapsed" FontFamily="Segoe Ui"/>
     </StackPanel>
             <TextBlock Text="API Call Results" Margin="2,0,0,-5" FontFamily="Segoe Ui" />

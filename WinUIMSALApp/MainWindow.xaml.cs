@@ -32,8 +32,11 @@ namespace WinUIMSALApp
             AzureADConfig azureADConfig = configuration.GetSection("AzureAD").Get<AzureADConfig>();
             this.MSALClientHelper = new MSALClientHelper(azureADConfig);
 
+            this.MSALClientHelper.windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+
             MSGraphApiConfig graphApiConfig = configuration.GetSection("MSGraphApi").Get<MSGraphApiConfig>();
             this.MSGraphHelper = new MSGraphHelper(graphApiConfig, this.MSALClientHelper);
+
         }
 
         private async void SignInWithDefaultButton_Click(object sender, RoutedEventArgs e)
@@ -141,17 +144,13 @@ namespace WinUIMSALApp
 
         private void SetButtonsVisibilityWhenSignedIn()
         {
-            this.CallGraphButton.Visibility = Visibility.Visible;
             this.SignOutButton.Visibility = Visibility.Visible;
-            this.SignInWithBrokerButton.Visibility = Visibility.Collapsed;
             this.SignInWithDefaultButton.Visibility = Visibility.Collapsed;
         }
 
         private void SetButtonsVisibilityWhenSignedOut()
         {
-            this.CallGraphButton.Visibility = Visibility.Collapsed;
             this.SignOutButton.Visibility = Visibility.Collapsed;
-            this.SignInWithBrokerButton.Visibility = Visibility.Visible;
             this.SignInWithDefaultButton.Visibility = Visibility.Visible;
         }
     }
