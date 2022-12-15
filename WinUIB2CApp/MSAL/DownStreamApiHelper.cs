@@ -31,7 +31,6 @@ namespace WinUIMSALAppB2C.MSAL
             }
 
             _downStreamApiConfig = downStreamApiConfig;
-
             _msalClient = msalClientHelper;
         }
 
