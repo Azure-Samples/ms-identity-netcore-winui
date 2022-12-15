@@ -43,7 +43,7 @@ namespace WinUIMSALAppB2C
 
             // Read configuration
             AzureADB2CConfig azureADConfig = configuration.GetSection("AzureADB2C").Get<AzureADB2CConfig>();
-            _msalClientHelper = new MSALClientHelper(azureADConfig,  WinRT.Interop.WindowNative.GetWindowHandle(this));
+            _msalClientHelper = new MSALClientHelper(azureADConfig);
 
             DownStreamApiConfig downStreamApiConfig = configuration.GetSection("DownstreamApi").Get<DownStreamApiConfig>();
             _downStreamApiHelper = new DownStreamApiHelper(downStreamApiConfig, _msalClientHelper);
