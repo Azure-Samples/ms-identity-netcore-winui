@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "WinUIMSALAppB2C (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "WinUIMSALAppB2C (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
