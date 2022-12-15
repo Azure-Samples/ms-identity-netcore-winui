@@ -25,7 +25,7 @@ namespace WinUIMSALAppB2C.MSAL
         /// <exception cref="System.ArgumentNullException">msalClientHelper</exception>
         public DownStreamApiHelper(DownStreamApiConfig downStreamApiConfig, MSALClientHelper msalClientHelper)
         {
-            if (msalClientHelper == null)
+            if (msalClientHelper is null)
             {
                 throw new ArgumentNullException(nameof(msalClientHelper));
             }
