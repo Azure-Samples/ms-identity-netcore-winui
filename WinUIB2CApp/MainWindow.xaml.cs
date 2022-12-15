@@ -44,29 +44,18 @@ namespace WinUIMSALAppB2C
 
             // Read configuration
             AzureADB2CConfig azureADConfig = configuration.GetSection("AzureADB2C").Get<AzureADB2CConfig>();
-            this.MSALClientHelper = new MSALClientHelper(azureADConfig);
-
-            this.MSALClientHelper.windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            this.MSALClientHelper = new MSALClientHelper(azureADConfig,  WinRT.Interop.WindowNative.GetWindowHandle(this));
 
             DownStreamApiConfig downStreamApiConfig = configuration.GetSection("DownstreamApi").Get<DownStreamApiConfig>();
             this.DownStreamApiHelper = new DownStreamApiHelper(downStreamApiConfig, this.MSALClientHelper);
 
         }
-
         private async void SignInWithDefaultButton_Click(object sender, RoutedEventArgs e)
         {
-            await MSALClientHelper.InitializePublicClientAppAsync();
+            await MSALClientHelper.InitializeB2CTokenCacheAsync();
 
             await SignInTheUser();
 
-        }
-
-        private async void SignInWithBrokerButton_Click(object sender, RoutedEventArgs e)
-        {
-            IntPtr? _windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            await MSALClientHelper.InitializePublicClientB2CAppAsync(_windowHandle);
-
-            await SignInTheUser();
         }
 
         private async Task SignInTheUser()
@@ -74,7 +63,7 @@ namespace WinUIMSALAppB2C
             try
             {
                 // Trigger sign-in and token acquisition flow
-                await DownStreamApiHelper.SignInAndInitializehServiceClient();
+                await DownStreamApiHelper.SignInUserAsync();
 
                 DispatcherQueue.TryEnqueue(() =>
                 {
@@ -97,8 +86,7 @@ namespace WinUIMSALAppB2C
         {
             try
             {
-                var userAccount = await this.MSALClientHelper.FetchSignedInUserFromCache();
-                this.MSALClientHelper.SignOutUser(userAccount);
+                await this.MSALClientHelper.SignOutUserAccountAsync();
 
                 DispatcherQueue.TryEnqueue(() =>
                 {
