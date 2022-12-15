@@ -20,7 +20,7 @@ namespace WinUIMSALAppB2C.MSAL
         /// <summary>
         /// As for the Tenant, you can use a name as obtained from the azure portal, e.g. kko365.onmicrosoft.com"
         /// </summary>
-        public readonly AzureADB2CConfig _azureADB2CConfig;
+        private readonly AzureADB2CConfig _azureADB2CConfig;
 
         /// <summary>
         /// The public client application used by the app
