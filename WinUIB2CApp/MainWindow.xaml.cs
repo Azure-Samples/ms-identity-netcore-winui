@@ -31,9 +31,8 @@ namespace WinUIMSALAppB2C
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        private MSALClientHelper MSALClientHelper;
-
-        private DownStreamApiHelper DownStreamApiHelper;
+        private MSALClientHelper _msalClientHelper;
+        private DownStreamApiHelper _downStreamApiHelper;
 
         public MainWindow()
         {
@@ -44,15 +43,15 @@ namespace WinUIMSALAppB2C
 
             // Read configuration
             AzureADB2CConfig azureADConfig = configuration.GetSection("AzureADB2C").Get<AzureADB2CConfig>();
-            this.MSALClientHelper = new MSALClientHelper(azureADConfig,  WinRT.Interop.WindowNative.GetWindowHandle(this));
+            _msalClientHelper = new MSALClientHelper(azureADConfig,  WinRT.Interop.WindowNative.GetWindowHandle(this));
 
             DownStreamApiConfig downStreamApiConfig = configuration.GetSection("DownstreamApi").Get<DownStreamApiConfig>();
-            this.DownStreamApiHelper = new DownStreamApiHelper(downStreamApiConfig, this.MSALClientHelper);
+            _downStreamApiHelper = new DownStreamApiHelper(downStreamApiConfig, _msalClientHelper);
 
         }
         private async void SignInWithDefaultButton_Click(object sender, RoutedEventArgs e)
         {
-            await MSALClientHelper.InitializeB2CTokenCacheAsync();
+            await _msalClientHelper.InitializeB2CTokenCacheAsync();
 
             await SignInTheUser();
 
@@ -63,7 +62,7 @@ namespace WinUIMSALAppB2C
             try
             {
                 // Trigger sign-in and token acquisition flow
-                await DownStreamApiHelper.SignInUserAsync();
+                await _downStreamApiHelper.SignInUserAsync();
 
                 DispatcherQueue.TryEnqueue(() =>
                 {
@@ -86,7 +85,7 @@ namespace WinUIMSALAppB2C
         {
             try
             {
-                await this.MSALClientHelper.SignOutUserAccountAsync();
+                await _msalClientHelper.SignOutUserAccountAsync();
 
                 DispatcherQueue.TryEnqueue(() =>
                 {
@@ -125,14 +124,14 @@ namespace WinUIMSALAppB2C
 
         private void SetButtonsVisibilityWhenSignedIn()
         {
-            this.SignOutButton.Visibility = Visibility.Visible;
-            this.SignInWithDefaultButton.Visibility = Visibility.Collapsed;
+            SignOutButton.Visibility = Visibility.Visible;
+            SignInWithDefaultButton.Visibility = Visibility.Collapsed;
         }
 
         private void SetButtonsVisibilityWhenSignedOut()
         {
-            this.SignOutButton.Visibility = Visibility.Collapsed;
-            this.SignInWithDefaultButton.Visibility = Visibility.Visible;
+            SignOutButton.Visibility = Visibility.Collapsed;
+            SignInWithDefaultButton.Visibility = Visibility.Visible;
         }
     }
 }

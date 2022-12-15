@@ -90,7 +90,7 @@ namespace WinUIMSALAppB2C.MSAL
 
             try
             {
-                var authResult = await this.PublicClientApplication.AcquireTokenSilent(scopes, existingAccount)
+                var authResult = await PublicClientApplication.AcquireTokenSilent(scopes, existingAccount)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -102,7 +102,7 @@ namespace WinUIMSALAppB2C.MSAL
                 Debug.WriteLine($"MsalUiRequiredException: {ex.Message}");
 
                 // Must be called from UI thread
-                var authResult = await this.PublicClientApplication.AcquireTokenInteractive(scopes)
+                var authResult = await PublicClientApplication.AcquireTokenInteractive(scopes)
                     .WithLoginHint(existingAccount?.Username ?? String.Empty)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -123,7 +123,7 @@ namespace WinUIMSALAppB2C.MSAL
         public async Task SignOutUserAccountAsync()
         {
             var existingUserAccount = await FetchAuthenticatedAccountFromCacheAsync().ConfigureAwait(false);
-            await this.PublicClientApplication.RemoveAsync(existingUserAccount).ConfigureAwait(false);
+            await PublicClientApplication.RemoveAsync(existingUserAccount).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace WinUIMSALAppB2C.MSAL
         public async Task<IAccount> FetchAuthenticatedAccountFromCacheAsync()
         {
             // get accounts from cache
-            IEnumerable<IAccount> accounts = await this.PublicClientApplication.GetAccountsAsync().ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await PublicClientApplication.GetAccountsAsync().ConfigureAwait(false);
 
             // Error corner case: we should always have 0 or 1 accounts, not expecting > 1
             // This is just an example of how to resolve this ambiguity, which can arise if more apps share a token cache.
@@ -142,7 +142,7 @@ namespace WinUIMSALAppB2C.MSAL
             {
                 foreach (var acc in accounts)
                 {
-                    await this.PublicClientApplication.RemoveAsync(acc);
+                    await PublicClientApplication.RemoveAsync(acc);
                 }
 
                 return null;
