@@ -26,6 +26,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readmefiles", "Readmefiles"
 		ReadmeFiles\ReadmeNextSteps.md = ReadmeFiles\ReadmeNextSteps.md
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinUIMSALAppB2C", "WinUIB2CApp\WinUIMSALAppB2C.csproj", "{6498F39D-D306-4BE1-B433-125303ABB88E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|arm64 = Debug|arm64
@@ -54,6 +56,24 @@ Global
 		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Release|x86.ActiveCfg = Release|x86
 		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Release|x86.Build.0 = Release|x86
 		{81022BE8-CFED-49BB-B4A0-997EB957BFED}.Release|x86.Deploy.0 = Release|x86
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Debug|arm64.ActiveCfg = Debug|ARM64
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Debug|arm64.Build.0 = Debug|ARM64
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Debug|arm64.Deploy.0 = Debug|ARM64
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Debug|x64.ActiveCfg = Debug|x64
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Debug|x64.Build.0 = Debug|x64
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Debug|x64.Deploy.0 = Debug|x64
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Debug|x86.ActiveCfg = Debug|x86
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Debug|x86.Build.0 = Debug|x86
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Debug|x86.Deploy.0 = Debug|x86
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Release|arm64.ActiveCfg = Release|ARM64
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Release|arm64.Build.0 = Release|ARM64
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Release|arm64.Deploy.0 = Release|ARM64
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Release|x64.ActiveCfg = Release|x64
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Release|x64.Build.0 = Release|x64
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Release|x64.Deploy.0 = Release|x64
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Release|x86.ActiveCfg = Release|x86
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Release|x86.Build.0 = Release|x86
+		{6498F39D-D306-4BE1-B433-125303ABB88E}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -11,13 +11,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.System;
 using WinUIMSALAppB2C.MSAL;
 
@@ -62,12 +56,14 @@ namespace WinUIMSALAppB2C
             try
             {
                 // Trigger sign-in and token acquisition flow
-                await _downStreamApiHelper.SignInUserAsync();
+                var authResult = await _downStreamApiHelper.SignInUserAndGetAuthenticationResultAsync();
 
                 DispatcherQueue.TryEnqueue(() =>
                 {
                     ResultText.Text = "User has signed-in successfully";
-                    TokenInfoText.Text = "Call B2C API";
+                    TokenInfoText.Text = $"Token Scopes: {Environment.NewLine + string.Join(Environment.NewLine, authResult.Scopes)}" + Environment.NewLine;
+                    TokenInfoText.Text += $"Token Expires: {authResult.ExpiresOn.ToLocalTime()}" + Environment.NewLine;
+
 
                     SetButtonsVisibilityWhenSignedIn();
                 });
@@ -100,28 +96,6 @@ namespace WinUIMSALAppB2C
                 ResultText.Text = $"Error signing-out user: {ex.Message}";
             }
         }
-
-        /// <summary>
-        /// Display basic information contained in the token. Needs to be called from the UI thread.
-        /// </summary>
-        private void DisplayBasicTokenInfo(AuthenticationResult authResult)
-        {
-            TokenInfoText.Text = "";
-            if (authResult != null)
-            {
-                TokenInfoText.Text += $"User Name: {authResult.Account.Username}" + Environment.NewLine;
-                TokenInfoText.Text += $"Token Expires: {authResult.ExpiresOn.ToLocalTime()}" + Environment.NewLine;
-            }
-        }
-
-        /// <summary>
-        /// Displays a message in the ResultText. Can be called from any thread.
-        /// </summary>
-        private void DisplayMessage(string message)
-        {
-            DispatcherQueue.TryEnqueue(() => { ResultText.Text = message; });
-        }
-
         private void SetButtonsVisibilityWhenSignedIn()
         {
             SignOutButton.Visibility = Visibility.Visible;

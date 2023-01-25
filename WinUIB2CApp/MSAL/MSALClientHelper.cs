@@ -77,11 +77,11 @@ namespace WinUIMSALAppB2C.MSAL
         }
 
         /// <summary>
-        /// Acquires an access token for a provided set of scopes for an account
+        /// Acquires an AuthenticationResult for a provided set of scopes for an account
         /// </summary>
         /// <param name="scopes"></param>
-        /// <returns> Access Token</returns>
-        public async Task<string> AcquireAccessTokenForUserAccountAsync(string[] scopes)
+        /// <returns>AuthenticationResult</returns>
+        public async Task<AuthenticationResult> AcquireAuthenticationResultForUserAccountAsync(string[] scopes)
         {
             var existingAccount = await FetchAuthenticatedAccountFromCacheAsync().ConfigureAwait(false);
 
@@ -91,7 +91,7 @@ namespace WinUIMSALAppB2C.MSAL
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                return authResult.AccessToken;
+                return authResult;
             }
             catch (MsalUiRequiredException ex)
             {
@@ -104,7 +104,7 @@ namespace WinUIMSALAppB2C.MSAL
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                return authResult.AccessToken;
+                return authResult;
             }
             catch (MsalException msalEx)
             {

@@ -37,9 +37,9 @@ namespace WinUIMSALAppB2C.MSAL
         /// <summary>
         /// Sign in user using MSAL and obtain a token for your API
         /// </summary>
-        public async Task SignInUserAsync()
+        public async Task<AuthenticationResult> SignInUserAndGetAuthenticationResultAsync()
         {
-            await _msalClient.AcquireAccessTokenForUserAccountAsync(_downStreamApiConfig.ScopesArray);
+            return await _msalClient.AcquireAuthenticationResultForUserAccountAsync(_downStreamApiConfig.ScopesArray);
         }
     }
 }
