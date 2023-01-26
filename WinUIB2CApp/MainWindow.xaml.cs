@@ -61,9 +61,17 @@ namespace WinUIMSALAppB2C
                 DispatcherQueue.TryEnqueue(() =>
                 {
                     ResultText.Text = "User has signed-in successfully";
-                    TokenInfoText.Text = $"Token Scopes: {Environment.NewLine + string.Join(Environment.NewLine, authResult.Scopes)}" + Environment.NewLine;
-                    TokenInfoText.Text += $"Token Expires: {authResult.ExpiresOn.ToLocalTime()}" + Environment.NewLine;
+                    TokenInfoText.Text = string.Empty;
 
+                    if (!string.IsNullOrEmpty(authResult.AccessToken))
+                    {
+                        TokenInfoText.Text = $"Token Scopes: {Environment.NewLine + string.Join(Environment.NewLine, authResult.Scopes)}" + Environment.NewLine;
+                        TokenInfoText.Text += $"Token Expires: {authResult.ExpiresOn.ToLocalTime()}" + Environment.NewLine;
+
+                        return;
+                    }
+
+                    TokenInfoText.Text = $"No access token found in response" + Environment.NewLine;
 
                     SetButtonsVisibilityWhenSignedIn();
                 });
