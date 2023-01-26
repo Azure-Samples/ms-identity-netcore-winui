@@ -67,11 +67,11 @@ namespace WinUIMSALAppB2C
                     {
                         TokenInfoText.Text = $"Token Scopes: {Environment.NewLine + string.Join(Environment.NewLine, authResult.Scopes)}" + Environment.NewLine;
                         TokenInfoText.Text += $"Token Expires: {authResult.ExpiresOn.ToLocalTime()}" + Environment.NewLine;
-
-                        return;
                     }
-
-                    TokenInfoText.Text = $"No access token found in response" + Environment.NewLine;
+                    else
+                    { 
+                        TokenInfoText.Text = $"No access token found in response" + Environment.NewLine;
+                    }
 
                     SetButtonsVisibilityWhenSignedIn();
                 });
